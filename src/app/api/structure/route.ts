@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getStructureFromManifest } from "@/lib/manifest";
 import {
   getDirectoryStructure,
   getDocsDirectory,
@@ -9,6 +10,14 @@ import {
 
 export async function GET() {
   try {
+    // Try to get structure from manifest first (production)
+    const manifestStructure = await getStructureFromManifest();
+
+    if (manifestStructure) {
+      return NextResponse.json(manifestStructure);
+    }
+
+    // Fallback to file system (development)
     const targetDir = getTargetDirectory();
     const docsDir = getDocsDirectory();
     const tasksDir = getTasksDirectory();

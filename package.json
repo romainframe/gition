@@ -35,7 +35,9 @@
     "bin/",
     "src/",
     "public/",
+    "scripts/",
     ".next/",
+    ".gition-manifest.json",
     "next.config.ts",
     "tsconfig.json",
     "tailwind.config.ts",
@@ -52,7 +54,7 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "node scripts/generate-manifest.js && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

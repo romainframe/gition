@@ -7,8 +7,8 @@
 
 > Zero-config local web interface for Markdown documentation and task management. Think Notion + Jira for your local files.
 
-> **🚧 Alpha Status**
->
+### 🚧 Alpha Status
+
 > This project is currently in early alpha and stems from a personal need for better local documentation and task management.
 >
 > It's also an experiment in [pAIr programming](https://arxiv.org/abs/2306.05153), inspired by research showing the benefits of collaborative development with AI assistants. Expect rapid changes and breaking updates as we iterate toward a stable release.
@@ -17,7 +17,7 @@
 
 - 📚 **Documentation**: Auto-discover and render Markdown/MDX files with real-time editing
 - 📋 **Task Management**: Kanban board with smart task parsing from Markdown syntax
-- 🔄 **Real-time Updates**: File watching with instant UI updates and scroll preservation
+- 🔄 **Real-time Updates**: File watching with instant UI updates
 - 🎨 **Customizable**: Themes, task types, and flexible configuration
 - 🌐 **Multi-language**: English, French, and Spanish support
 - 📱 **Responsive**: Works on desktop and mobile devices

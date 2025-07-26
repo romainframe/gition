@@ -14,11 +14,11 @@ name: "My Project"
 description: "Project documentation and task management"
 
 # Directory Structure
-docsDir: "docs"          # Where documentation files are stored
-tasksDir: "tasks"        # Where task files are stored
+docsDir: "docs" # Where documentation files are stored
+tasksDir: "tasks" # Where task files are stored
 
 # Default Language
-defaultLanguage: "en"    # en, fr, or es
+defaultLanguage: "en" # en, fr, or es
 ```
 
 ## Theme Configuration
@@ -29,10 +29,10 @@ Customize the appearance of your workspace:
 theme:
   # Primary color (CSS color value)
   primaryColor: "#3b82f6"
-  
+
   # Default theme mode
   darkMode: true
-  
+
   # Custom CSS variables
   variables:
     "--border-radius": "8px"
@@ -46,19 +46,19 @@ Enable or disable specific features:
 ```yaml
 features:
   # Core Features
-  taskManagement: true      # Enable task board and management
-  realTimeUpdates: true     # Enable file watching and live updates
-  search: true              # Enable global search functionality
-  
+  taskManagement: true # Enable task board and management
+  realTimeUpdates: true # Enable file watching and live updates
+  search: true # Enable global search functionality
+
   # UI Features
-  darkModeToggle: true      # Show dark/light mode toggle
-  languageSelector: true    # Show language selection dropdown
-  sidebarCollapse: true     # Allow sidebar to be collapsed
-  
+  darkModeToggle: true # Show dark/light mode toggle
+  languageSelector: true # Show language selection dropdown
+  sidebarCollapse: true # Allow sidebar to be collapsed
+
   # Advanced Features
-  codeHighlighting: true    # Syntax highlighting for code blocks
-  mermaidDiagrams: false    # Mermaid diagram support (coming soon)
-  mathRendering: false      # LaTeX math rendering (coming soon)
+  codeHighlighting: true # Syntax highlighting for code blocks
+  mermaidDiagrams: false # Mermaid diagram support (coming soon)
+  mathRendering: false # LaTeX math rendering (coming soon)
 ```
 
 ## Task Types
@@ -71,17 +71,17 @@ taskTypes:
     folder: "epics"
     icon: "target"
     color: "#8b5cf6"
-    
+
   - name: "story"
-    folder: "stories" 
+    folder: "stories"
     icon: "book"
     color: "#3b82f6"
-    
+
   - name: "bug"
     folder: "bugs"
     icon: "bug"
     color: "#ef4444"
-    
+
   - name: "doc"
     folder: "documentation"
     icon: "file-text"
@@ -91,6 +91,7 @@ taskTypes:
 ### Available Icons
 
 Common icon names you can use:
+
 - `target`, `book`, `bug`, `file-text`
 - `check-circle`, `clock`, `flag`, `star`
 - `user`, `users`, `settings`, `folder`
@@ -105,11 +106,11 @@ users:
   - name: "John Doe"
     email: "john@example.com"
     avatar: "https://example.com/avatar.jpg"
-    
+
   - name: "Jane Smith"
     email: "jane@example.com"
     role: "Product Manager"
-    
+
   - name: "Bob Wilson"
     email: "bob@example.com"
     role: "Developer"
@@ -153,11 +154,11 @@ workspaces:
   - name: "Frontend"
     docsDir: "frontend/docs"
     tasksDir: "frontend/tasks"
-    
+
   - name: "Backend"
     docsDir: "backend/docs"
     tasksDir: "backend/tasks"
-    
+
   - name: "Mobile"
     docsDir: "mobile/docs"
     tasksDir: "mobile/tasks"
@@ -173,22 +174,22 @@ taskStatuses:
     name: "Backlog"
     icon: "inbox"
     color: "#6b7280"
-    
+
   - id: "todo"
     name: "To Do"
     icon: "circle"
     color: "#6b7280"
-    
+
   - id: "in_progress"
     name: "In Progress"
     icon: "clock"
     color: "#f59e0b"
-    
+
   - id: "review"
     name: "In Review"
     icon: "eye"
     color: "#8b5cf6"
-    
+
   - id: "done"
     name: "Done"
     icon: "check-circle"
@@ -203,13 +204,13 @@ Configure how files are processed:
 processing:
   # File extensions to include
   includeExtensions: [".md", ".mdx", ".txt"]
-  
+
   # Directories to ignore
   ignoreDirs: ["node_modules", ".git", ".next", "dist"]
-  
+
   # Files to ignore
   ignoreFiles: [".DS_Store", "Thumbs.db"]
-  
+
   # Maximum file size (in MB)
   maxFileSize: 10
 ```
@@ -249,16 +250,19 @@ curl -X POST http://localhost:3000/api/config \
 ## Troubleshooting
 
 ### Configuration not loading
+
 - Check YAML syntax with an online validator
 - Ensure file permissions allow reading
 - Look for error messages in the console
 
 ### Features not working
+
 - Verify feature flags are enabled
 - Check browser console for JavaScript errors
 - Ensure all required directories exist
 
 ### Performance issues
+
 - Reduce `maxFileSize` if processing large files
 - Add more directories to `ignoreDirs`
 - Disable real-time updates for very large projects

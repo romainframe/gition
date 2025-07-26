@@ -39,56 +39,12 @@ import { StatusEditor } from "@/components/ui/status-editor";
 import { TaskMetadataEditor } from "@/components/ui/task-metadata-editor";
 import { useLanguage } from "@/contexts/language-context";
 import { useComponentInspect } from "@/hooks/use-inspect";
+import type { SubTask, Task } from "@/models";
 import { useTaskStore } from "@/store/useTaskStore";
 
-interface TaskItem {
-  id: string;
-  title: string;
-  completed: boolean;
-  status: "todo" | "in_progress" | "done";
-  line: number;
-  file: string;
-  type: "doc" | "epic" | "story" | "bug" | "custom";
-  folder?: string;
-  references?: string[];
-  metadata?: {
-    priority?: "low" | "medium" | "high" | "critical";
-    due_date?: string;
-    assignee?: string;
-    tags?: string[];
-    estimate?: number;
-    status?: "blocked" | "waiting" | "review";
-  };
-}
-
-interface TaskGroup {
-  id: string;
-  name: string;
-  type: "doc" | "epic" | "story" | "bug" | "custom";
-  file: string;
-  folder?: string;
-  tasks: TaskItem[];
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-  content?: string;
-  metadata?: {
-    title?: string;
-    description?: string;
-    tags?: string[];
-    author?: string;
-    date?: string;
-    priority?: "low" | "medium" | "high" | "critical";
-    assignee?: string;
-    due_date?: string;
-    estimate?: string;
-    status?: string;
-  };
-}
-
 interface TaskFile {
-  group: TaskGroup | null;
-  tasks: TaskItem[];
+  group: Task | null;
+  tasks: SubTask[];
   content: string;
   filename: string;
 }
@@ -162,7 +118,7 @@ const TaskList = ({
   taskGroupId,
   showCompleted = true,
 }: {
-  tasks: TaskItem[];
+  tasks: SubTask[];
   taskGroupId: string;
   showCompleted?: boolean;
 }) => {

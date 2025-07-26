@@ -25,21 +25,23 @@ This document tests all the enhanced features of our new markdown renderer.
 Here are some examples of syntax highlighted code blocks:
 
 ### JavaScript
+
 ```javascript
 const greetings = {
   english: "Hello World!",
   french: "Bonjour le monde!",
-  spanish: "¡Hola mundo!"
+  spanish: "¡Hola mundo!",
 };
 
-function greet(language = 'english') {
+function greet(language = "english") {
   return greetings[language] || greetings.english;
 }
 
-console.log(greet('french')); // Bonjour le monde!
+console.log(greet("french")); // Bonjour le monde!
 ```
 
 ### TypeScript
+
 ```typescript
 interface User {
   id: number;
@@ -57,10 +59,10 @@ interface Role {
 class UserService {
   private users: User[] = [];
 
-  async createUser(userData: Omit<User, 'id'>): Promise<User> {
+  async createUser(userData: Omit<User, "id">): Promise<User> {
     const newUser: User = {
       id: Date.now(),
-      ...userData
+      ...userData,
     };
     this.users.push(newUser);
     return newUser;
@@ -69,6 +71,7 @@ class UserService {
 ```
 
 ### Python
+
 ```python
 import asyncio
 from typing import List, Optional
@@ -76,12 +79,12 @@ from typing import List, Optional
 class TaskManager:
     def __init__(self):
         self.tasks: List[str] = []
-    
+
     async def add_task(self, task: str) -> None:
         """Add a new task to the list"""
         self.tasks.append(task)
         print(f"Added task: {task}")
-    
+
     async def complete_task(self, task_index: int) -> Optional[str]:
         """Mark a task as completed"""
         if 0 <= task_index < len(self.tasks):
@@ -101,6 +104,7 @@ if __name__ == "__main__":
 ```
 
 ### Shell/Bash
+
 ```bash
 #!/bin/bash
 
@@ -129,6 +133,7 @@ echo "✅ Deployment completed successfully!"
 Here are some Mermaid diagram examples:
 
 ### Flowchart
+
 ```mermaid
 graph TD
     A[Start] --> B{Is authenticated?}
@@ -143,6 +148,7 @@ graph TD
 ```
 
 ### Sequence Diagram
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -159,6 +165,7 @@ sequenceDiagram
 ```
 
 ### Class Diagram
+
 ```mermaid
 classDiagram
     class User {
@@ -169,20 +176,20 @@ classDiagram
         +login()
         +logout()
     }
-    
+
     class Role {
         +String id
         +String name
         +Permission[] permissions
     }
-    
+
     class Permission {
         +String id
         +String name
         +String resource
         +String action
     }
-    
+
     User "1" -- "*" Role
     Role "1" -- "*" Permission
 ```
@@ -190,25 +197,33 @@ classDiagram
 ## Enhanced Typography
 
 ### Headings
+
 # Heading 1
+
 ## Heading 2
+
 ### Heading 3
+
 #### Heading 4
+
 ##### Heading 5
+
 ###### Heading 6
 
 ### Lists
 
 **Unordered list:**
+
 - First item
 - Second item with **bold text**
-- Third item with *italic text*
+- Third item with _italic text_
 - Nested list:
   - Nested item 1
   - Nested item 2
     - Deeply nested item
 
 **Ordered list:**
+
 1. First step
 2. Second step
 3. Third step with `inline code`
@@ -217,23 +232,24 @@ classDiagram
 ### Blockquotes
 
 > This is a blockquote with some important information.
-> 
+>
 > It can span multiple paragraphs and contain **formatted text**.
 
 > **Important Note:** This is a special blockquote with emphasis.
 
 ### Tables
 
-| Feature | Status | Priority | Assignee |
-|---------|--------|----------|----------|
-| Syntax Highlighting | ✅ Complete | High | Claude |
-| Mermaid Diagrams | ✅ Complete | High | Claude |
-| Custom Components | ✅ Complete | Medium | Claude |
-| Enhanced Typography | ✅ Complete | Low | Claude |
+| Feature             | Status      | Priority | Assignee |
+| ------------------- | ----------- | -------- | -------- |
+| Syntax Highlighting | ✅ Complete | High     | Claude   |
+| Mermaid Diagrams    | ✅ Complete | High     | Claude   |
+| Custom Components   | ✅ Complete | Medium   | Claude   |
+| Enhanced Typography | ✅ Complete | Low      | Claude   |
 
 ### Links and References
 
 Here are some example links:
+
 - [External link to GitHub](https://github.com)
 - [Internal documentation](./best-practices)
 - [Email link](mailto:example@test.com)
@@ -251,19 +267,19 @@ Content below the rule.
 ### Callouts (if implemented)
 
 <div class="callout callout-info">
-This is an info callout with important information.
+  This is an info callout with important information.
 </div>
 
 <div class="callout callout-warning">
-This is a warning callout - please pay attention!
+  This is a warning callout - please pay attention!
 </div>
 
 <div class="callout callout-error">
-This is an error callout indicating something went wrong.
+  This is an error callout indicating something went wrong.
 </div>
 
 <div class="callout callout-success">
-This is a success callout celebrating an achievement!
+  This is a success callout celebrating an achievement!
 </div>
 
 ### Custom Details/Summary
@@ -274,6 +290,7 @@ This is a success callout celebrating an achievement!
 This content is hidden by default and can be expanded by clicking the summary.
 
 It can contain:
+
 - Multiple paragraphs
 - Code blocks
 - Lists
@@ -288,15 +305,19 @@ console.log("Hidden code example!");
 ## Advanced Features
 
 ### Inline Code
+
 You can use `inline code` anywhere in your text, including variables like `const myVariable = 'value'`.
 
 ### Math (if supported)
+
 Some mathematical expressions: E = mc²
 
 ### Emoji Support
+
 🚀 📚 💻 ✅ ⚠️ ❌ 🎉
 
 ### Task Lists
+
 - [x] Implement syntax highlighting
 - [x] Add Mermaid diagram support
 - [x] Create enhanced typography

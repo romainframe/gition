@@ -32,7 +32,7 @@ When enabled, Vibe Inspect Mode overlays an information icon (i) on components w
 
 ```typescript
 export function isDevelopment(): boolean {
-  return process.env.NODE_ENV === 'development';
+  return process.env.NODE_ENV === "development";
 }
 
 export function isVibeInspectAvailable(): boolean {
@@ -57,6 +57,7 @@ interface InspectContextType {
 ```
 
 **Key implementation details:**
+
 - Uses `useMemo` and `useCallback` to prevent infinite re-renders
 - Stores component metadata in a Map for efficient lookups
 - Provides stable references to prevent dependency array issues
@@ -66,7 +67,7 @@ interface InspectContextType {
 Wrapper component that adds inspect capabilities:
 
 ```typescript
-<InspectOverlay 
+<InspectOverlay
   componentId="header-main"
   metadata={{
     name: "Header",
@@ -80,6 +81,7 @@ Wrapper component that adds inspect capabilities:
 ```
 
 **Features:**
+
 - Only renders in development mode when inspect is enabled
 - Shows (i) icon on component hover
 - Handles tooltip visibility and positioning
@@ -98,6 +100,7 @@ interface ComponentMetadata {
 ```
 
 **Smart positioning algorithm:**
+
 - Calculates tooltip dimensions
 - Adjusts position to keep within viewport
 - Handles both horizontal and vertical overflow
@@ -109,7 +112,7 @@ Simplified hook for component registration:
 ```typescript
 const useInspect = (componentId: string, metadata: ComponentMetadata) => {
   const { registerComponent } = useInspectContext();
-  
+
   useEffect(() => {
     registerComponent(componentId, metadata);
   }, [componentId, metadata.name, metadata.filePath]);
@@ -143,7 +146,7 @@ import { InspectOverlay } from '@/components/dev/inspect-overlay';
 
 export function MyComponent() {
   return (
-    <InspectOverlay 
+    <InspectOverlay
       componentId="my-component"
       metadata={{
         name: "MyComponent",
@@ -202,6 +205,7 @@ useEffect(() => {
 **Problem**: Tooltip appears off-screen or in wrong position.
 
 **Solution**: The smart positioning algorithm automatically handles this, but ensure:
+
 - Tooltip container has `position: fixed`
 - Z-index is high enough (`z-50` or higher)
 - Viewport boundaries are calculated correctly
@@ -234,22 +238,23 @@ A comprehensive test suite has been created to test the inspect mode functionali
 
 ```typescript
 // tests/debug-inspect.spec.ts
-test('capture homepage state and test inspect mode', async ({ page }) => {
-  await page.goto('/');
-  
+test("capture homepage state and test inspect mode", async ({ page }) => {
+  await page.goto("/");
+
   // Check if inspect toggle is available
   const inspectToggle = page.locator('button[title*="Vibe Inspect"]');
-  const isInspectAvailable = await inspectToggle.count() > 0;
-  
+  const isInspectAvailable = (await inspectToggle.count()) > 0;
+
   if (isInspectAvailable) {
     // Enable inspect mode
     await inspectToggle.click();
-    
+
     // Test hover functionality
-    await page.locator('header').hover();
-    
+    await page.locator("header").hover();
+
     // Check for tooltip
-    const tooltip = page.locator('[class*="fixed"][class*="z-"]')
+    const tooltip = page
+      .locator('[class*="fixed"][class*="z-"]')
       .filter({ hasText: /(Header|Component|metadata)/i });
     await expect(tooltip).toBeVisible();
   }

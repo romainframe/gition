@@ -15,11 +15,13 @@ Improve the user experience by fixing sidebar scrolling behavior and content are
 ## Requirements
 
 ### Sidebar Improvements
+
 - Sidebar should remain fixed and not scroll with main content
 - Only sidebar items should scroll internally when there are many items
 - Format sidebar item names properly (capitalize first letter, spaces instead of dashes) OR use MDX title metadata
 
 ### Content Scrolling
+
 - On doc and task detail pages, only the content area should scroll
 - The "info section" (header/metadata area) should remain fixed
 - Content below the info section should be scrollable independently
@@ -37,18 +39,21 @@ Improve the user experience by fixing sidebar scrolling behavior and content are
 ## Implementation Notes
 
 ### Sidebar Changes
+
 - Modify sidebar component CSS to use fixed positioning
 - Add internal scroll container for sidebar items
 - Update name formatting logic to capitalize and add spaces
 - Consider using MDX frontmatter title if available
 
 ### Content Area Changes
+
 - Restructure doc and task detail page layouts
 - Create fixed header/info sections
 - Implement scrollable content containers
 - Ensure proper height calculations for viewport
 
 ### Files to Modify
+
 - `src/components/sidebar.tsx` - Sidebar component
 - `src/app/docs/[slug]/page.tsx` - Doc detail page
 - `src/app/tasks/[...slug]/page.tsx` - Task detail page
@@ -62,7 +67,7 @@ All UX improvements have been successfully implemented:
 2. **Internal Sidebar Scrolling**: Updated `sidebar.tsx` with `ScrollArea` component and `h-full` for proper overflow handling
 3. **Name Formatting**: Added `formatDisplayName()` function to properly capitalize and format sidebar item names
 4. **Fixed Info Sections**: Restructured both doc and task detail pages with:
-   - Fixed header section using `flex-shrink-0` 
+   - Fixed header section using `flex-shrink-0`
    - Scrollable content area using `flex-1 overflow-auto`
    - Proper height calculations with `h-[calc(100vh-6rem)]`
 5. **Responsive Design**: Layout maintains functionality across different screen sizes

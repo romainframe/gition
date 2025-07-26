@@ -6,8 +6,8 @@ import type {
   DirectoryNode,
   FileMetadata,
   MarkdownFile,
-  TaskGroup,
-  TaskItem,
+  SubTask,
+  Task,
   TaskType,
 } from "@/models";
 import { getTaskTypeFromFolder } from "@/models";
@@ -169,8 +169,8 @@ export function getTasksFiles(): MarkdownFile[] {
 /**
  * Extract task items from markdown content with hierarchical support
  */
-export function extractTasks(content: string, filepath: string): TaskItem[] {
-  const tasks: TaskItem[] = [];
+export function extractTasks(content: string, filepath: string): SubTask[] {
+  const tasks: SubTask[] = [];
   const lines = content.split("\n");
 
   // Determine task type and folder from file path
@@ -193,7 +193,7 @@ export function extractTasks(content: string, filepath: string): TaskItem[] {
       const completed = checkbox.toLowerCase() === "x";
 
       // Parse metadata from title (priority, tags, due date, references)
-      const metadata: TaskItem["metadata"] = {};
+      const metadata: SubTask["metadata"] = {};
       const references: string[] = [];
       let title = fullTitle.trim();
 
@@ -290,8 +290,8 @@ export function extractTasks(content: string, filepath: string): TaskItem[] {
 /**
  * Get all tasks from both docs and tasks directories
  */
-export function getAllTasks(): TaskItem[] {
-  const allTasks: TaskItem[] = [];
+export function getAllTasks(): SubTask[] {
+  const allTasks: SubTask[] = [];
 
   // Get tasks from docs files
   const docsFiles = getDocsFiles();
@@ -313,9 +313,9 @@ export function getAllTasks(): TaskItem[] {
 /**
  * Group tasks hierarchically by parent files/epics
  */
-export function getTaskGroups(): TaskGroup[] {
+export function getTaskGroups(): Task[] {
   const allTasks = getAllTasks();
-  const groups: Map<string, TaskGroup> = new Map();
+  const groups: Map<string, Task> = new Map();
 
   // Get all markdown files to access frontmatter
   const docsFiles = getDocsFiles();
@@ -347,6 +347,8 @@ export function getTaskGroups(): TaskGroup[] {
         pendingTasks: 0,
         content: fileData ? fileData.content : undefined,
         metadata,
+        slug: groupId.replace(/\\/g, "/"),
+        excerpt: fileData?.metadata?.description || "",
       });
     }
 
@@ -387,7 +389,7 @@ export function getTaskGroups(): TaskGroup[] {
 /**
  * Get tasks for a specific group (for individual Kanban boards)
  */
-export function getTasksByGroup(groupId: string): TaskItem[] {
+export function getTasksByGroup(groupId: string): SubTask[] {
   const allTasks = getAllTasks();
   const [folder, filename] = groupId.includes("/")
     ? groupId.split("/")

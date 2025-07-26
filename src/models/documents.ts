@@ -1,7 +1,8 @@
 /**
  * Document-related data models for Gition
- * Contains interfaces for markdown files and their metadata
+ * Contains interfaces for documentation files and their metadata
  */
+import { MDXFile } from "./mdx";
 
 export interface FileMetadata {
   // Core fields
@@ -41,6 +42,23 @@ export interface FileMetadata {
   [key: string]: unknown;
 }
 
+/**
+ * Document interface for documentation MDX files
+ */
+export interface Doc extends MDXFile {
+  // Additional fields specific to documentation
+  category?: string;
+  section?: string;
+  order?: number;
+  difficulty?: "beginner" | "intermediate" | "advanced";
+  readingTime?: number;
+  wordCount?: number;
+}
+
+/**
+ * Legacy interface - use Doc instead
+ * @deprecated
+ */
 export interface MarkdownFile {
   slug: string; // path-based identifier
   filename: string; // file basename with extension

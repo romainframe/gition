@@ -29,6 +29,7 @@ GET /api/config
 ```
 
 **Response:**
+
 ```json
 {
   "name": "My Project",
@@ -54,6 +55,7 @@ POST /api/config
 ```
 
 **Body:**
+
 ```json
 {
   "theme": {
@@ -63,6 +65,7 @@ POST /api/config
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -81,12 +84,14 @@ GET /api/docs
 ```
 
 **Query Parameters:**
+
 - `search` - Filter by search term
 - `tag` - Filter by tag
 - `limit` - Number of results (default: 50)
 - `offset` - Pagination offset (default: 0)
 
 **Response:**
+
 ```json
 {
   "docs": [
@@ -116,6 +121,7 @@ GET /api/docs/[slug]
 ```
 
 **Response:**
+
 ```json
 {
   "id": "getting-started",
@@ -141,6 +147,7 @@ GET /api/tasks?view=groups
 ```
 
 **Response:**
+
 ```json
 {
   "taskGroups": [
@@ -178,6 +185,7 @@ GET /api/tasks/[id]
 ```
 
 **Response:**
+
 ```json
 {
   "id": "project-setup",
@@ -199,6 +207,7 @@ PATCH /api/task-management/[taskId]/status
 ```
 
 **Body:**
+
 ```json
 {
   "status": "done"
@@ -206,6 +215,7 @@ PATCH /api/task-management/[taskId]/status
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -220,6 +230,7 @@ PATCH /api/task-management/[taskId]/metadata
 ```
 
 **Body:**
+
 ```json
 {
   "metadata": {
@@ -237,6 +248,7 @@ PATCH /api/subtasks/[taskId]/[subtaskId]
 ```
 
 **Body:**
+
 ```json
 {
   "status": "in_progress",
@@ -257,9 +269,11 @@ GET /api/tasks/kanban
 ```
 
 **Query Parameters:**
+
 - `group` - Filter by task group ID
 
 **Response:**
+
 ```json
 {
   "columns": [
@@ -308,12 +322,14 @@ GET /api/files/watch
 ```
 
 **Headers:**
+
 ```
 Accept: text/event-stream
 Cache-Control: no-cache
 ```
 
 **Event Types:**
+
 - `connected` - Connection established
 - `file-change` - File modified
 - `file-add` - File added
@@ -321,6 +337,7 @@ Cache-Control: no-cache
 - `heartbeat` - Keep-alive ping
 
 **Event Format:**
+
 ```
 event: file-change
 data: {"type":"file-change","path":"docs/guide.md","timestamp":1642234567890}
@@ -333,6 +350,7 @@ GET /api/structure
 ```
 
 **Response:**
+
 ```json
 {
   "structure": {
@@ -401,19 +419,21 @@ All API endpoints return consistent error responses:
 Future versions will include WebSocket support for real-time collaboration:
 
 ```javascript
-const ws = new WebSocket('ws://localhost:3000/api/ws');
+const ws = new WebSocket("ws://localhost:3000/api/ws");
 
-ws.on('message', (data) => {
+ws.on("message", (data) => {
   const event = JSON.parse(data);
   // Handle real-time updates
 });
 
 // Send cursor position
-ws.send(JSON.stringify({
-  type: 'cursor',
-  position: { line: 10, column: 5 },
-  file: 'docs/guide.md'
-}));
+ws.send(
+  JSON.stringify({
+    type: "cursor",
+    position: { line: 10, column: 5 },
+    file: "docs/guide.md",
+  })
+);
 ```
 
 ---
@@ -424,7 +444,7 @@ ws.send(JSON.stringify({
 
 ```javascript
 class GitionAPI {
-  constructor(baseUrl = 'http://localhost:3000/api') {
+  constructor(baseUrl = "http://localhost:3000/api") {
     this.baseUrl = baseUrl;
   }
 
@@ -434,11 +454,14 @@ class GitionAPI {
   }
 
   async updateTaskStatus(taskId, status) {
-    const response = await fetch(`${this.baseUrl}/task-management/${taskId}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    });
+    const response = await fetch(
+      `${this.baseUrl}/task-management/${taskId}/status`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      }
+    );
     return response.json();
   }
 }

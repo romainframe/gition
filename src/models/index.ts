@@ -3,8 +3,11 @@
  * Centralized export of all data model interfaces and types
  */
 
+// MDX base models
+export type { MDXFile, MDXMetadata } from "./mdx";
+
 // Document models
-export type { FileMetadata, MarkdownFile } from "./documents";
+export type { FileMetadata, MarkdownFile, Doc } from "./documents";
 
 export { isDocumentStatus, isPriority } from "./documents";
 
@@ -13,9 +16,13 @@ export type {
   TaskStatus,
   TaskPriority,
   TaskType,
-  TaskItemMetadata,
-  TaskItem,
-  TaskGroup,
+  SubTaskMetadata,
+  SubTask,
+  Task,
+  // Legacy exports for backward compatibility
+  SubTaskMetadata as TaskItemMetadata,
+  SubTask as TaskItem,
+  Task as TaskGroup,
 } from "./tasks";
 
 export {

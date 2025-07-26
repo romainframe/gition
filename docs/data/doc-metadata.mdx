@@ -15,36 +15,36 @@ All MDX documents can include frontmatter with the following optional fields:
 
 ### Core Fields
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `title` | `string` | Document title (overrides H1 if present) | `"Getting Started Guide"` |
-| `description` | `string` | Brief description of the document | `"Learn how to set up Gition"` |
-| `type` | `string` | Document type | `"guide" \| "tutorial" \| "reference" \| "spec"` |
-| `tags` | `string[]` | Categorization tags | `["setup", "beginner"]` |
+| Field         | Type       | Description                              | Example                                          |
+| ------------- | ---------- | ---------------------------------------- | ------------------------------------------------ |
+| `title`       | `string`   | Document title (overrides H1 if present) | `"Getting Started Guide"`                        |
+| `description` | `string`   | Brief description of the document        | `"Learn how to set up Gition"`                   |
+| `type`        | `string`   | Document type                            | `"guide" \| "tutorial" \| "reference" \| "spec"` |
+| `tags`        | `string[]` | Categorization tags                      | `["setup", "beginner"]`                          |
 
 ### Author & Dates
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `author` | `string` | Document author | `"John Doe"` |
-| `created` | `string` | Creation date (ISO format) | `"2024-01-15"` |
+| Field     | Type     | Description                   | Example        |
+| --------- | -------- | ----------------------------- | -------------- |
+| `author`  | `string` | Document author               | `"John Doe"`   |
+| `created` | `string` | Creation date (ISO format)    | `"2024-01-15"` |
 | `updated` | `string` | Last update date (ISO format) | `"2024-01-20"` |
 
 ### Organization
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `category` | `string` | High-level category | `"documentation" \| "guides" \| "reference"` |
-| `section` | `string` | Section within category | `"getting-started"` |
-| `order` | `number` | Sort order within section | `1` |
+| Field      | Type     | Description               | Example                                      |
+| ---------- | -------- | ------------------------- | -------------------------------------------- |
+| `category` | `string` | High-level category       | `"documentation" \| "guides" \| "reference"` |
+| `section`  | `string` | Section within category   | `"getting-started"`                          |
+| `order`    | `number` | Sort order within section | `1`                                          |
 
 ### Content Metadata
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `status` | `string` | Document status | `"draft" \| "review" \| "published" \| "archived"` |
-| `version` | `string` | Document version | `"1.0.0"` |
-| `language` | `string` | Content language | `"en" \| "fr" \| "es"` |
+| Field      | Type     | Description      | Example                                            |
+| ---------- | -------- | ---------------- | -------------------------------------------------- |
+| `status`   | `string` | Document status  | `"draft" \| "review" \| "published" \| "archived"` |
+| `version`  | `string` | Document version | `"1.0.0"`                                          |
+| `language` | `string` | Content language | `"en" \| "fr" \| "es"`                             |
 
 ## Subtask Integration
 
@@ -57,6 +57,7 @@ Documents can contain **subtasks** (checkbox items) using standard markdown chec
 ```
 
 **Important distinction:**
+
 - **Tasks** = MDX files themselves (appear in main task list and kanban)
 - **Subtasks** = Checkbox items within MDX files (appear inside task detail views)
 

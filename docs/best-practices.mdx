@@ -57,8 +57,8 @@ tags: ["category", "subcategory", "feature"]
 author: "Author Name"
 date: "2024-01-15"
 lastModified: "2024-01-20"
-status: "published"  # draft, published, archived
-priority: "high"     # low, medium, high
+status: "published" # draft, published, archived
+priority: "high" # low, medium, high
 ---
 ```
 
@@ -72,21 +72,27 @@ Follow a consistent document structure:
 > Brief description or summary
 
 ## Overview
+
 Brief introduction to the topic
 
 ## Prerequisites
+
 What readers need to know beforehand
 
 ## Step-by-Step Guide
+
 Detailed instructions with examples
 
 ## Examples
+
 Real-world use cases
 
 ## Troubleshooting
+
 Common issues and solutions
 
 ## Related Resources
+
 Links to related documentation
 ```
 
@@ -115,7 +121,6 @@ status: "in_progress"
 assignee: "team-lead"
 due_date: "2024-03-01"
 ---
-
 # Story - User-facing features
 ---
 title: "Login Page Implementation"
@@ -125,7 +130,6 @@ assignee: "frontend-dev"
 estimate: 5
 parent: "user-authentication-system"
 ---
-
 # Bug - Issues to fix
 ---
 title: "Memory Leak in File Watcher"
@@ -142,11 +146,13 @@ Write clear, actionable task descriptions:
 
 ```markdown
 # Good Example
+
 ## Login Page Implementation
 
 **Goal**: Create a responsive login page with form validation
 
 **Acceptance Criteria**:
+
 - [ ] Email and password input fields
 - [ ] Client-side validation with error messages
 - [ ] Submit button with loading state
@@ -156,6 +162,7 @@ Write clear, actionable task descriptions:
 - [ ] Accessibility compliance (WCAG 2.1 AA)
 
 **Technical Notes**:
+
 - Use React Hook Form for form management
 - Implement Zod schema validation
 - Follow existing design system patterns
@@ -200,7 +207,7 @@ users:
     email: "john@company.com"
     role: "Developer"
     avatar: "https://github.com/johndoe.png"
-    
+
   - name: "Jane Smith"
     email: "jane@company.com"
     role: "Product Manager"
@@ -211,7 +218,7 @@ taskTypes:
     folder: "epics"
     icon: "target"
     color: "#8b5cf6"
-    
+
   - name: "story"
     folder: "stories"
     icon: "book"
@@ -251,7 +258,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
       - name: Install Gition
         run: npm install -g gition-ui
       - name: Validate documentation
@@ -287,17 +294,17 @@ Optimize Gition for large projects:
 ```yaml
 # .gitionrc/config.yaml
 processing:
-  maxFileSize: 5  # MB
+  maxFileSize: 5 # MB
   ignoreDirs: ["node_modules", ".git", "dist", "build"]
   includeExtensions: [".md", ".mdx"]
-  
+
 features:
-  realTimeUpdates: false  # Disable for very large projects
+  realTimeUpdates: false # Disable for very large projects
   search: true
-  
+
 cache:
   enabled: true
-  ttl: 300  # 5 minutes
+  ttl: 300 # 5 minutes
 ```
 
 ### Memory Management
@@ -331,7 +338,7 @@ Control access to sensitive content:
 access:
   publicDirs: ["docs/public"]
   privateDirs: ["docs/internal", "tasks/confidential"]
-  requireAuth: false  # Enable in future versions
+  requireAuth: false # Enable in future versions
 ```
 
 ## 📊 Analytics & Monitoring
@@ -423,6 +430,7 @@ Keep your team informed:
 Before publishing content, verify:
 
 ### Documentation
+
 - [ ] Clear, descriptive title
 - [ ] Proper frontmatter metadata
 - [ ] Consistent formatting and style
@@ -431,6 +439,7 @@ Before publishing content, verify:
 - [ ] Proper grammar and spelling
 
 ### Tasks
+
 - [ ] Clear acceptance criteria
 - [ ] Appropriate priority and estimation
 - [ ] Proper categorization and tagging
@@ -439,6 +448,7 @@ Before publishing content, verify:
 - [ ] Progress tracking enabled
 
 ### Configuration
+
 - [ ] Valid YAML syntax
 - [ ] Environment variables documented
 - [ ] Security settings reviewed

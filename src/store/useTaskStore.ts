@@ -1,18 +1,18 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import type { TaskGroup, TaskItem } from "@/models";
+import type { SubTask, Task } from "@/models";
 
 interface TaskStore {
   // State
-  taskGroups: TaskGroup[];
-  selectedTaskGroup: TaskGroup | null;
+  taskGroups: Task[];
+  selectedTaskGroup: Task | null;
   isLoading: boolean;
   error: string | null;
 
   // Actions
-  setTaskGroups: (groups: TaskGroup[]) => void;
-  setSelectedTaskGroup: (group: TaskGroup | null) => void;
+  setTaskGroups: (groups: Task[]) => void;
+  setSelectedTaskGroup: (group: Task | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
@@ -20,12 +20,12 @@ interface TaskStore {
   updateSubtaskStatus: (
     taskGroupId: string,
     subtaskId: string,
-    status: TaskItem["status"]
+    status: SubTask["status"]
   ) => Promise<void>;
   updateSubtaskMetadata: (
     taskGroupId: string,
     subtaskId: string,
-    metadata: Partial<TaskItem["metadata"]>
+    metadata: Partial<SubTask["metadata"]>
   ) => Promise<void>;
   toggleSubtaskCompleted: (
     taskGroupId: string,

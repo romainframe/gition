@@ -2,10 +2,8 @@ kind: GlobalConfig
 version: "1.0.0"
 
 spec:
-
   name: "Gition Development"
   description: "Zero-config local web interface for managing Markdown/MDX documentation and tasks"
-
 
   theme:
     primaryColor: "#1dd8f9"
@@ -37,13 +35,12 @@ spec:
       folder: "tasks"
       icon: "check-circle"
       color: "#10b981"
-  
+
   # Development-specific settings
   development:
     debug: true
     logLevel: "info"
     hotReload: true
-
 # # Users
 # users:
 #   - name: "Romainframe"

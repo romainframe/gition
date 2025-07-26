@@ -2,12 +2,12 @@
  * Kanban board data models for Gition
  * Contains interfaces for kanban columns and boards
  */
-import { TaskItem } from "./tasks";
+import { SubTask } from "./tasks";
 
 export interface KanbanColumn {
   id: string; // unique column identifier
   title: string; // column display title
-  tasks: TaskItem[]; // tasks in this column
+  tasks: SubTask[]; // tasks in this column
 }
 
 export interface KanbanBoard {
@@ -35,7 +35,7 @@ export const createEmptyKanbanBoard = (
   groupName,
 });
 
-export const organizeTasksIntoColumns = (tasks: TaskItem[]): KanbanColumn[] => {
+export const organizeTasksIntoColumns = (tasks: SubTask[]): KanbanColumn[] => {
   const columns = createEmptyKanbanBoard().columns;
 
   tasks.forEach((task) => {

@@ -310,56 +310,56 @@ sequenceDiagram
     </div>
   </div>
 
-  <div className="flex items-center gap-4">
-    <Badge
-      variant="outline"
-      className="w-8 h-8 rounded-full p-0 flex items-center justify-center"
-    >
-      2
-    </Badge>
-    <div className="flex-1">
-      <h4 className="font-semibold">Frontmatter Parsing</h4>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        Extract metadata using gray-matter
-      </p>
-      - [x] Parse YAML frontmatter - [x] Validate required fields - [ ] Schema
-      validation @high due:2024-01-28T11:00:00Z
-    </div>
+<div className="flex items-center gap-4">
+  <Badge
+    variant="outline"
+    className="w-8 h-8 rounded-full p-0 flex items-center justify-center"
+  >
+    2
+  </Badge>
+  <div className="flex-1">
+    <h4 className="font-semibold">Frontmatter Parsing</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Extract metadata using gray-matter
+    </p>
+    - [x] Parse YAML frontmatter - [x] Validate required fields - [ ] Schema
+    validation @high due:2024-01-28T11:00:00Z
   </div>
+</div>
 
-  <div className="flex items-center gap-4">
-    <Badge
-      variant="outline"
-      className="w-8 h-8 rounded-full p-0 flex items-center justify-center"
-    >
-      3
-    </Badge>
-    <div className="flex-1">
-      <h4 className="font-semibold">Task Extraction</h4>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        Find and parse checkbox items
-      </p>
-      - [x] Extract checkbox syntax - [ ] Parse task metadata @critical
-      due:2024-01-26T15:00:00Z - [ ] Handle nested tasks @high
-    </div>
+<div className="flex items-center gap-4">
+  <Badge
+    variant="outline"
+    className="w-8 h-8 rounded-full p-0 flex items-center justify-center"
+  >
+    3
+  </Badge>
+  <div className="flex-1">
+    <h4 className="font-semibold">Task Extraction</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Find and parse checkbox items
+    </p>
+    - [x] Extract checkbox syntax - [ ] Parse task metadata @critical
+    due:2024-01-26T15:00:00Z - [ ] Handle nested tasks @high
   </div>
+</div>
 
-  <div className="flex items-center gap-4">
-    <Badge
-      variant="outline"
-      className="w-8 h-8 rounded-full p-0 flex items-center justify-center"
-    >
-      4
-    </Badge>
-    <div className="flex-1">
-      <h4 className="font-semibold">MDX Compilation</h4>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        Compile MDX with custom components
-      </p>
-      - [x] MDX to React compilation - [x] Component registration - [x] Syntax
-      highlighting
-    </div>
+<div className="flex items-center gap-4">
+  <Badge
+    variant="outline"
+    className="w-8 h-8 rounded-full p-0 flex items-center justify-center"
+  >
+    4
+  </Badge>
+  <div className="flex-1">
+    <h4 className="font-semibold">MDX Compilation</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Compile MDX with custom components
+    </p>
+    - [x] MDX to React compilation - [x] Component registration - [x] Syntax
+    highlighting
   </div>
+</div>
 
   <div className="flex items-center gap-4">
     <Badge
@@ -504,22 +504,22 @@ export const plugin = {
     </CardContent>
   </Card>
 
-  <Card>
-    <CardHeader>
-      <CardTitle className="text-lg">Caching Strategy</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <ul className="space-y-2 text-sm">
-        <li>• In-memory document cache</li>
-        <li>• Parsed MDX cache</li>
-        <li>• Task index cache</li>
-      </ul>
-      <div className="mt-4">
-        - [ ] Design cache structure - [ ] Implement LRU cache - [ ] Add cache
-        invalidation
-      </div>
-    </CardContent>
-  </Card>
+<Card>
+  <CardHeader>
+    <CardTitle className="text-lg">Caching Strategy</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ul className="space-y-2 text-sm">
+      <li>• In-memory document cache</li>
+      <li>• Parsed MDX cache</li>
+      <li>• Task index cache</li>
+    </ul>
+    <div className="mt-4">
+      - [ ] Design cache structure - [ ] Implement LRU cache - [ ] Add cache
+      invalidation
+    </div>
+  </CardContent>
+</Card>
 
   <Card>
     <CardHeader>
@@ -635,25 +635,25 @@ graph TB
     <TabsTrigger value="mobile">Mobile</TabsTrigger>
   </TabsList>
 
-  <TabsContent value="collaboration">
-    <div className="space-y-4">
-      <h4 className="font-semibold">Local Network Collaboration</h4>- [ ] WebRTC
-      peer connections - [ ] Operational Transform for conflicts - [ ] Presence
-      indicators - [ ] Real-time cursors
-      <h4 className="font-semibold mt-4">Requirements</h4>- [ ] Design CRDT
-      implementation - [ ] Build signaling server - [ ] Create conflict UI
-    </div>
-  </TabsContent>
+<TabsContent value="collaboration">
+  <div className="space-y-4">
+    <h4 className="font-semibold">Local Network Collaboration</h4>- [ ] WebRTC
+    peer connections - [ ] Operational Transform for conflicts - [ ] Presence
+    indicators - [ ] Real-time cursors
+    <h4 className="font-semibold mt-4">Requirements</h4>- [ ] Design CRDT
+    implementation - [ ] Build signaling server - [ ] Create conflict UI
+  </div>
+</TabsContent>
 
-  <TabsContent value="sync">
-    <div className="space-y-4">
-      <h4 className="font-semibold">Optional Cloud Backup</h4>- [ ] End-to-end
-      encryption - [ ] Selective sync - [ ] Version history - [ ] Cross-device
-      sync
-      <h4 className="font-semibold mt-4">Privacy First</h4>- [ ] Zero-knowledge
-      architecture - [ ] Local encryption keys - [ ] User-controlled data
-    </div>
-  </TabsContent>
+<TabsContent value="sync">
+  <div className="space-y-4">
+    <h4 className="font-semibold">Optional Cloud Backup</h4>- [ ] End-to-end
+    encryption - [ ] Selective sync - [ ] Version history - [ ] Cross-device
+    sync
+    <h4 className="font-semibold mt-4">Privacy First</h4>- [ ] Zero-knowledge
+    architecture - [ ] Local encryption keys - [ ] User-controlled data
+  </div>
+</TabsContent>
 
   <TabsContent value="mobile">
     <div className="space-y-4">

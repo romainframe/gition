@@ -38,41 +38,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetadataEditor } from "@/components/ui/metadata-editor";
 import { StatusEditor } from "@/components/ui/status-editor";
 import { useLanguage } from "@/contexts/language-context";
+import type { KanbanBoard, KanbanColumn, SubTask } from "@/models";
 import { useTaskStore } from "@/store/useTaskStore";
 
-interface TaskItem {
-  id: string;
-  title: string;
-  completed: boolean;
-  status: "todo" | "in_progress" | "done";
-  line: number;
-  file: string;
-  type: "doc" | "epic" | "story" | "custom";
-  folder?: string;
-  references?: string[];
-  metadata?: {
-    priority?: "low" | "medium" | "high";
-    due_date?: string;
-    assignee?: string;
-    tags?: string[];
-    estimate?: number;
-    status?: "blocked" | "waiting" | "review";
-  };
-}
-
-interface KanbanColumn {
-  id: string;
-  title: string;
-  tasks: TaskItem[];
-}
-
-interface KanbanBoard {
-  columns: KanbanColumn[];
-  groupName?: string;
-  totalTasks: number;
-}
-
-function DraggableTaskCard({ task }: { task: TaskItem }) {
+function DraggableTaskCard({ task }: { task: SubTask }) {
   const {
     attributes,
     listeners,
@@ -301,7 +270,7 @@ function KanbanColumn({ column }: { column: KanbanColumn }) {
 
 function KanbanPageContent() {
   const [kanbanBoard, setKanbanBoard] = useState<KanbanBoard | null>(null);
-  const [activeTask, setActiveTask] = useState<TaskItem | null>(null);
+  const [activeTask, setActiveTask] = useState<SubTask | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

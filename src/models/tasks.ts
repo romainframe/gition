@@ -1,14 +1,15 @@
 /**
  * Task-related data models for Gition
- * Contains interfaces for tasks, subtasks, and task groups
+ * Contains interfaces for tasks and subtasks
  */
 import { FileMetadata } from "./documents";
+import { MDXFile } from "./mdx";
 
 export type TaskStatus = "todo" | "in_progress" | "done";
 export type TaskPriority = "low" | "medium" | "high" | "critical";
 export type TaskType = "doc" | "epic" | "story" | "bug" | "custom";
 
-export interface TaskItemMetadata {
+export interface SubTaskMetadata {
   priority?: TaskPriority;
   due_date?: string; // ISO date string
   assignee?: string; // assigned person/team
@@ -23,7 +24,7 @@ export interface TaskItemMetadata {
   ref?: string; // reference to another task file
 }
 
-export interface TaskItem {
+export interface SubTask {
   id: string; // unique identifier (file + line)
   title: string; // task description text
   completed: boolean; // checkbox completion state
@@ -33,17 +34,17 @@ export interface TaskItem {
   type: TaskType; // task type (inherited from parent file)
   folder?: string; // parent folder name (e.g., "epics")
   references?: string[]; // references to other tasks/files
-  metadata?: TaskItemMetadata; // inline task metadata
+  metadata?: SubTaskMetadata; // inline task metadata
   [key: string]: unknown; // allow additional properties
 }
 
-export interface TaskGroup {
+export interface Task extends MDXFile {
   id: string; // unique identifier
   name: string; // display name (usually filename)
   type: TaskType; // task category from folder structure
   file: string; // source file path
   folder?: string; // organizing folder
-  subtasks: TaskItem[]; // array of contained subtasks
+  subtasks: SubTask[]; // array of contained subtasks
   totalTasks: number; // total number of subtasks
   completedTasks: number; // number of completed subtasks
   pendingTasks: number; // number of pending subtasks
@@ -66,9 +67,9 @@ export const isTaskType = (type: string): type is TaskType => {
 };
 
 // Utility functions
-export const getTaskProgress = (taskGroup: TaskGroup): number => {
-  if (taskGroup.totalTasks === 0) return 0;
-  return Math.round((taskGroup.completedTasks / taskGroup.totalTasks) * 100);
+export const getTaskProgress = (task: Task): number => {
+  if (task.totalTasks === 0) return 0;
+  return Math.round((task.completedTasks / task.totalTasks) * 100);
 };
 
 export const getTaskTypeFromFolder = (folder: string): TaskType => {

@@ -27,13 +27,21 @@ lint-fix:
 
 # Run type checking
 typecheck:
-  npx tsc --noEmit --skipLibCheck
+  npx tsc --noEmit
 
 # Run all checks (lint only for now, typecheck has known issues)
 check: lint
 
-# Run lint and typecheck (typecheck has known issues)
-check-strict: lint typecheck
+# Run prettier
+check-pretty:
+  pnpm prettier --check .
+
+# Run lint, typecheck, and prettier
+check-all: lint typecheck check-pretty
+
+# Run prettier
+prettify:
+  pnpm prettier --write .
 
 # Run unit tests
 test:

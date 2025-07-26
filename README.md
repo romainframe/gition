@@ -7,7 +7,11 @@
 
 > Zero-config local web interface for Markdown documentation and task management. Think Notion + Jira for your local files.
 
-![Gition Demo](https://via.placeholder.com/800x400/1f2937/ffffff?text=Gition+Demo+Screenshot)
+> **🚧 Alpha Status**
+>
+> This project is currently in early alpha and stems from a personal need for better local documentation and task management.
+>
+> It's also an experiment in [pAIr programming](https://arxiv.org/abs/2306.05153), inspired by research showing the benefits of collaborative development with AI assistants. Expect rapid changes and breaking updates as we iterate toward a stable release.
 
 ## Features
 
@@ -21,17 +25,8 @@
 ## Quick Start
 
 ```bash
-# Install globally
-npm install -g gition-ui
-
-# Initialize a new workspace
-npx gition-ui init
-
-# Start the server
+# Start gition
 npx gition-ui
-
-# Or serve a specific directory
-npx gition-ui /path/to/docs
 ```
 
 Open http://localhost:3000 to see your documentation and tasks.
@@ -117,19 +112,18 @@ See [Development Guide](./docs/development.mdx) for detailed instructions.
 
 - ✅ **v0.1**: Core features, CLI, task management, real-time updates
 - 🚧 **v0.2**: Advanced MDX features, collaboration, performance improvements
-- 🎯 **v0.3**: AI features, enterprise deployment, plugin system
 
-See our [roadmap](./tasks/v0.2-roadmap.md) for detailed plans.
+See the [roadmap](./tasks/v0.2-roadmap.md) for detailed plans.
 
 ## Support
 
 - 🐛 [Issues](https://github.com/romainframe/gition/issues) - Bug reports and feature requests
 - 💬 [Discussions](https://github.com/romainframe/gition/discussions) - Questions and community
-- 📧 [Email](mailto:support@gition.dev) - Direct support
+- 📧 [Email](mailto:romain@untereiner.com) - Direct support
 
 ## License
 
-MIT © [Romain Frame](https://github.com/romainframe)
+MIT © [Romain](https://github.com/romainframe)
 
 ---
 

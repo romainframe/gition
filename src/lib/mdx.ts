@@ -83,11 +83,9 @@ export function getTargetDirectory(): string {
 
   const cwd = process.cwd();
 
-  if (process.env.NETLIFY === "true") {
-    const examplesFirstPath = path.join(cwd, "examples", "first");
-    if (fs.existsSync(examplesFirstPath)) {
-      return examplesFirstPath;
-    }
+  const dataPath = path.join(cwd, "data");
+  if (fs.existsSync(dataPath)) {
+    return dataPath;
   }
 
   return cwd;

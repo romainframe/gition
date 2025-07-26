@@ -73,7 +73,7 @@ export function Header() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-16 items-center px-6 lg:px-8">
           {/* Left: Logo */}
-          <div className="flex">
+          <div className="flex w-64">
             <Link className="flex items-center space-x-3" href="/">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 shadow-sm">
                 <div className="h-4 w-4 rounded-sm bg-white/90" />
@@ -84,10 +84,8 @@ export function Header() {
             </Link>
           </div>
 
-          <div className="flex-1 flex max-w-80"></div>
-
           {/* Center: Navigation */}
-          <div className="flex-1 flex justify-left">
+          <div className="flex-1 flex justify-left pl-4 2xl:pl-12">
             <nav className="hidden md:flex items-center space-x-1">
               {navigation.map((item) => (
                 <Link

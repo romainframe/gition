@@ -1,0 +1,577 @@
+---
+title: "File System Integration"
+description: "Deep dive into how Gition integrates with the local file system for real-time updates and data synchronization"
+type: "reference"
+category: "documentation"
+section: "architecture"
+tags: ["filesystem", "file-watching", "real-time", "synchronization"]
+author: "Development Team"
+status: "published"
+version: "1.0.0"
+---
+
+# File System Integration
+
+Gition's core strength lies in its seamless integration with the local file system. This document explains how the system watches, processes, and synchronizes with your Markdown and MDX files in real-time.
+
+## File System Architecture
+
+```mermaid
+graph TB
+    A[Target Directory] --> B[Directory Scanner]
+    B --> C[File Discovery]
+    C --> D[Watcher Initialization]
+
+    D --> E[Chokidar Watcher]
+    E --> F[Event Detection]
+    F --> G[Change Classification]
+
+    G --> H[File Added]
+    G --> I[File Modified]
+    G --> J[File Deleted]
+
+    H --> K[Process New File]
+    I --> L[Reprocess File]
+    J --> M[Remove from Cache]
+
+    K --> N[Update Stores]
+    L --> N
+    M --> N
+
+    N --> O[Broadcast Updates]
+    O --> P[UI Refresh]
+```
+
+## Directory Structure Conventions
+
+### Standard Layout
+
+```
+project/
+├── docs/                    # Documentation files
+│   ├── guides/             # Organized in subdirectories
+│   │   ├── getting-started.mdx
+│   │   └── advanced.mdx
+│   ├── api/
+│   │   └── reference.mdx
+│   └── README.md
+├── tasks/                   # Task management files
+│   ├── epics/              # Epic-level tasks
+│   │   ├── user-auth.mdx
+│   │   └── api-design.mdx
+│   ├── stories/            # Story-level tasks
+│   │   ├── login-form.mdx
+│   │   └── user-profile.mdx
+│   └── bugs.mdx
+└── .gitionrc/              # Configuration directory
+    └── config.yaml
+```
+
+### File Discovery Process
+
+```mermaid
+graph LR
+    A[Startup Scan] --> B[Recursive Directory Walk]
+    B --> C[File Extension Filter]
+    C --> D[.md/.mdx Files Only]
+    D --> E[Path Classification]
+
+    E --> F[docs/ → Documentation]
+    E --> G[tasks/ → Task Management]
+    E --> H[Other → Mixed Content]
+
+    F --> I[Document Processing]
+    G --> J[Task Processing]
+    H --> K[Auto-detect Type]
+```
+
+**Supported File Extensions:**
+
+- `.md` - Standard Markdown files
+- `.mdx` - MDX files with React components
+- Frontmatter in both formats using YAML
+
+## File Watching Implementation
+
+### Chokidar Configuration
+
+```typescript
+// File watcher setup
+const watcherConfig = {
+  ignored: /node_modules|\.git|\.next/,
+  persistent: true,
+  ignoreInitial: true,
+  recursive: true,
+  awaitWriteFinish: {
+    stabilityThreshold: 100,
+    pollInterval: 50,
+  },
+};
+
+// Watch specific directories
+const watchPaths = [
+  path.join(targetDir, "docs"),
+  path.join(targetDir, "tasks"),
+].filter(fs.existsSync);
+```
+
+### Event Handling Pipeline
+
+```mermaid
+graph TB
+    A[File System Event] --> B[Chokidar Detection]
+    B --> C[Event Type Classification]
+
+    C --> D[add Event]
+    C --> E[change Event]
+    C --> F[unlink Event]
+
+    D --> G[File Extension Check]
+    E --> G
+    F --> G
+
+    G --> H[.md/.mdx Only?]
+    H --> I[No: Ignore]
+    H --> J[Yes: Process]
+
+    J --> K[Debounce Check]
+    K --> L[SSE Broadcast]
+    L --> M[Client Update]
+```
+
+### Real-Time Communication
+
+```mermaid
+sequenceDiagram
+    participant FS as File System
+    participant W as Watcher
+    participant S as SSE Server
+    participant C as Client Browser
+    participant U as UI Store
+
+    FS->>W: File changed event
+    W->>W: Validate file type
+    W->>S: Emit change event
+    S->>C: Send SSE message
+    C->>U: Update store state
+    U->>C: Trigger re-render
+
+    Note over S,C: Keep-alive heartbeat every 30s
+    Note over W,S: Debounce rapid changes
+```
+
+## File Processing Pipeline
+
+### Content Parsing Stages
+
+```mermaid
+graph TB
+    A[Raw File Content] --> B[Encoding Detection]
+    B --> C[UTF-8 Conversion]
+    C --> D[Frontmatter Split]
+
+    D --> E[YAML Frontmatter]
+    D --> F[Markdown Body]
+
+    E --> G[Parse Metadata]
+    F --> H[Task Extraction]
+    F --> I[Content Processing]
+
+    G --> J[Document Object]
+    H --> K[Task Objects]
+    I --> L[Rendered Content]
+
+    J --> M[Store Update]
+    K --> M
+    L --> M
+```
+
+### Frontmatter Processing
+
+```typescript
+// Frontmatter extraction and validation
+interface FrontmatterProcessor {
+  detect: "Check for --- delimiters";
+  extract: "Split YAML from content";
+  parse: "yaml.parse() with error handling";
+  validate: "Schema validation against known fields";
+  merge: "Combine with defaults";
+  normalize: "Convert to internal format";
+}
+```
+
+**Example Processing:**
+
+```yaml
+---
+title: "API Documentation"
+type: "reference"
+tags: ["api", "backend"]
+priority: "high"
+updated: "2024-01-15"
+---
+# API Documentation
+
+Content goes here...
+```
+
+### Task Extraction Algorithm
+
+```mermaid
+graph LR
+    A[Line-by-Line Scan] --> B[Regex Pattern Match]
+    B --> C[Checkbox Detection]
+    C --> D[Status Mapping]
+
+    B --> E[Metadata Parsing]
+    E --> F[Priority Extraction]
+    E --> G[Assignee Parsing]
+    E --> H[Date Parsing]
+    E --> I[Reference Links]
+
+    D --> J[Task Object Creation]
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+
+    J --> K[Add to Collection]
+```
+
+**Advanced Task Syntax:**
+
+```markdown
+- [ ] Simple task
+- [x] Completed task {priority: high}
+- [~] In progress task +john @2024-02-01
+- [ ] Complex task (high) +jane @next-week #frontend ref:epics/auth
+```
+
+**Parsing Rules:**
+
+- `{metadata}` - JSON-like metadata block
+- `(priority)` - Priority shorthand: (low), (medium), (high)
+- `+username` - Assignee designation
+- `@date` - Due date (ISO format or natural language)
+- `#tag` - Tags for categorization
+- `ref:path` - Cross-references to other files
+
+## File System Operations
+
+### Read Operations
+
+```mermaid
+graph TB
+    A[Read Request] --> B[Path Validation]
+    B --> C[Security Check]
+    C --> D[File Exists?]
+
+    D --> E[No: 404 Error]
+    D --> F[Yes: Read Content]
+
+    F --> G[Encoding Detection]
+    G --> H[Stream Reading]
+    H --> I[Content Caching]
+
+    I --> J[Return Content]
+
+    B --> K[Path Traversal Check]
+    C --> L[Directory Whitelist]
+    K --> M[Reject Unsafe Paths]
+    L --> N[Allow docs/ tasks/ only]
+```
+
+### Write Operations
+
+```mermaid
+graph TB
+    A[Write Request] --> B[Validation]
+    B --> C[Backup Creation]
+    C --> D[Atomic Write]
+
+    D --> E[Write to Temp File]
+    E --> F[Verify Content]
+    F --> G[Move to Target]
+
+    G --> H[Success Path]
+    G --> I[Error Path]
+
+    H --> J[Update Timestamp]
+    I --> K[Restore Backup]
+
+    J --> L[Trigger File Event]
+    K --> M[Log Error]
+```
+
+**Write Safety Measures:**
+
+- Atomic operations using temporary files
+- Automatic backup creation before changes
+- Content validation before committing
+- Rollback capability on errors
+
+### File Synchronization
+
+```mermaid
+sequenceDiagram
+    participant UI as User Interface
+    participant API as API Layer
+    participant FS as File System
+    participant W as File Watcher
+    participant S as Store
+
+    UI->>API: Update task status
+    API->>FS: Write file change
+    FS->>W: File modified event
+    W->>S: Update store
+    S->>UI: Refresh display
+
+    Note over API,FS: Optimistic updates
+    Note over W,S: Verification cycle
+```
+
+## Error Handling & Recovery
+
+### File System Errors
+
+```mermaid
+graph TB
+    A[File Operation] --> B[Error Detection]
+
+    B --> C[Permission Denied]
+    B --> D[File Not Found]
+    B --> E[Disk Full]
+    B --> F[Network Drive Unavailable]
+
+    C --> G[Retry with Different Path]
+    D --> H[Create Missing Directories]
+    E --> I[Cleanup Temp Files]
+    F --> J[Fallback to Cache]
+
+    G --> K[Log Error & Continue]
+    H --> K
+    I --> K
+    J --> K
+
+    K --> L[User Notification]
+    L --> M[Graceful Degradation]
+```
+
+### Content Parsing Errors
+
+```typescript
+// Error recovery strategies
+interface ErrorRecovery {
+  yamlError: "Skip frontmatter, use filename as title";
+  mdxError: "Fall back to plain markdown rendering";
+  taskParseError: "Skip malformed tasks, continue processing";
+  encodingError: "Try different encodings, default to UTF-8";
+  memoryError: "Process files in smaller batches";
+}
+```
+
+### Recovery Mechanisms
+
+```mermaid
+graph LR
+    A[Error Detected] --> B[Error Type Analysis]
+    B --> C[Recoverable?]
+
+    C --> D[Yes: Apply Recovery]
+    C --> E[No: Graceful Fail]
+
+    D --> F[Partial Success]
+    E --> G[Error State]
+
+    F --> H[Log Warning]
+    G --> I[Log Error]
+
+    H --> J[Continue Operation]
+    I --> K[User Notification]
+```
+
+## Performance Optimization
+
+### File Watching Performance
+
+```mermaid
+graph TB
+    A[Optimization Strategies] --> B[Selective Watching]
+    A --> C[Event Debouncing]
+    A --> D[Efficient Parsing]
+    A --> E[Memory Management]
+
+    B --> F[Watch Only Relevant Dirs]
+    C --> G[Batch Rapid Changes]
+    D --> H[Stream Processing]
+    E --> I[Cache Management]
+
+    F --> J[Reduced CPU Usage]
+    G --> K[Smoother UI Updates]
+    H --> L[Faster Processing]
+    I --> M[Lower Memory Usage]
+```
+
+### Caching Strategy
+
+```typescript
+// Multi-level caching approach
+interface CacheStrategy {
+  parsed: "Cache parsed frontmatter and content";
+  tasks: "Cache extracted task objects";
+  rendered: "Cache compiled MDX components";
+  metadata: "Cache file statistics and timestamps";
+  invalidation: "Clear cache on file change";
+}
+```
+
+### Batching Operations
+
+```mermaid
+graph LR
+    A[Multiple File Changes] --> B[Batch Collection]
+    B --> C[Debounce Timer]
+    C --> D[Process Batch]
+    D --> E[Single Store Update]
+    E --> F[One UI Refresh]
+
+    style A fill:#ffebee
+    style F fill:#e8f5e8
+```
+
+## Platform Considerations
+
+### Cross-Platform File Watching
+
+```typescript
+// Platform-specific optimizations
+const platformOptimizations = {
+  windows: {
+    usePolling: false,
+    binaryInterval: 300,
+    stabilityThreshold: 2000,
+  },
+  macos: {
+    usePolling: false,
+    useFsEvents: true,
+    atomic: true,
+  },
+  linux: {
+    usePolling: false,
+    useInotify: true,
+    atomic: true,
+  },
+};
+```
+
+### Path Handling
+
+```mermaid
+graph TB
+    A[File Path] --> B[Platform Detection]
+
+    B --> C[Windows]
+    B --> D[macOS/Linux]
+
+    C --> E[Normalize Backslashes]
+    D --> F[Handle Case Sensitivity]
+
+    E --> G[Resolve Relative Paths]
+    F --> G
+
+    G --> H[Security Validation]
+    H --> I[Canonical Path]
+```
+
+## Security Considerations
+
+### Path Traversal Prevention
+
+```typescript
+// Security validation
+function validatePath(requestedPath: string, baseDir: string): boolean {
+  const resolved = path.resolve(baseDir, requestedPath);
+  const relative = path.relative(baseDir, resolved);
+
+  // Prevent directory traversal
+  return !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+```
+
+### File Access Control
+
+```mermaid
+graph TB
+    A[File Access Request] --> B[Path Validation]
+    B --> C[Whitelist Check]
+    C --> D[Permission Verification]
+
+    B --> E[No Directory Traversal]
+    C --> F[docs/ or tasks/ only]
+    D --> G[Read/Write Permissions]
+
+    E --> H[Allow Access]
+    F --> H
+    G --> H
+
+    H --> I[Process File]
+
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#c8e6c9
+```
+
+## Integration with Development Tools
+
+### Git Integration
+
+```mermaid
+graph LR
+    A[Git Commit] --> B[File Changes]
+    B --> C[Gition Detection]
+    C --> D[Automatic Refresh]
+
+    E[Git Merge] --> F[Conflict Resolution]
+    F --> G[File Validation]
+    G --> H[Parse Updates]
+
+    I[Git Pull] --> J[Remote Changes]
+    J --> K[Local Sync]
+    K --> L[UI Updates]
+```
+
+### IDE Integration
+
+```typescript
+// IDE file save detection
+interface IDEIntegration {
+  vscode: "Automatic save detection via file watcher";
+  webstorm: "Safe write detection with stabilityThreshold";
+  vim: "Multiple event detection for swap files";
+  emacs: "Backup file filtering and main file detection";
+}
+```
+
+### Build Tool Integration
+
+```mermaid
+graph TB
+    A[Build Process] --> B[File Generation]
+    B --> C[docs/ Updates]
+    C --> D[Gition Refresh]
+
+    E[Hot Reload] --> F[Development Mode]
+    F --> G[Instant Updates]
+
+    H[CI/CD Pipeline] --> I[Documentation Build]
+    I --> J[Automated Updates]
+```
+
+This file system integration ensures:
+
+- **Real-time responsiveness** with sub-100ms update latency
+- **Data integrity** through atomic operations and validation
+- **Cross-platform compatibility** with optimized file watching
+- **Security** through path validation and access control
+- **Performance** via intelligent caching and batching
+- **Reliability** with comprehensive error handling and recovery

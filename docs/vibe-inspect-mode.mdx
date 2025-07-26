@@ -1,0 +1,340 @@
+---
+title: "Vibe Inspect Mode"
+description: "Development mode feature for inspecting component metadata in real-time"
+author: "Claude & Romain"
+date: "2025-01-26"
+status: "completed"
+priority: "high"
+tags: ["development", "debugging", "react", "components", "metadata"]
+---
+
+# Vibe Inspect Mode
+
+The Vibe Inspect Mode is a powerful development feature that allows developers to inspect component metadata in real-time by hovering over components in the browser. This feature is only available in development mode and provides detailed information about components including their file paths, interfaces, and API dependencies.
+
+## Overview
+
+When enabled, Vibe Inspect Mode overlays an information icon (i) on components when hovered. Clicking or hovering over this icon displays a tooltip with comprehensive component metadata.
+
+## Features
+
+- **Development-only mode**: Only available when `NODE_ENV === 'development'`
+- **Real-time inspection**: Hover over components to see metadata instantly
+- **Smart tooltip positioning**: Tooltips automatically position to stay within viewport
+- **Component metadata**: Shows component name, file path, interfaces, and API dependencies
+- **Easy toggle**: Enable/disable via header button (eye icon)
+
+## Implementation Architecture
+
+### Core Components
+
+#### 1. Development Mode Detection (`/src/utils/dev-mode.ts`)
+
+```typescript
+export function isDevelopment(): boolean {
+  return process.env.NODE_ENV === 'development';
+}
+
+export function isVibeInspectAvailable(): boolean {
+  return isDevelopment();
+}
+```
+
+#### 2. Inspect Context (`/src/contexts/inspect-context.tsx`)
+
+Central state management for inspect mode using React Context API:
+
+```typescript
+interface InspectContextType {
+  isInspectMode: boolean;
+  toggleInspectMode: () => void;
+  isAvailable: boolean;
+  registerComponent: (id: string, metadata: ComponentMetadata) => void;
+  getComponentMetadata: (id: string) => ComponentMetadata | undefined;
+  hoveredComponent: string | null;
+  setHoveredComponent: (id: string | null) => void;
+}
+```
+
+**Key implementation details:**
+- Uses `useMemo` and `useCallback` to prevent infinite re-renders
+- Stores component metadata in a Map for efficient lookups
+- Provides stable references to prevent dependency array issues
+
+#### 3. Inspect Overlay (`/src/components/dev/inspect-overlay.tsx`)
+
+Wrapper component that adds inspect capabilities:
+
+```typescript
+<InspectOverlay 
+  componentId="header-main"
+  metadata={{
+    name: "Header",
+    filePath: "src/components/layout/header.tsx",
+    interfaces: ["HeaderProps"],
+    apiDependencies: ["useTheme", "useRouter"]
+  }}
+>
+  <YourComponent />
+</InspectOverlay>
+```
+
+**Features:**
+- Only renders in development mode when inspect is enabled
+- Shows (i) icon on component hover
+- Handles tooltip visibility and positioning
+
+#### 4. Inspect Tooltip (`/src/components/dev/inspect-tooltip.tsx`)
+
+Displays component metadata in a floating card:
+
+```typescript
+interface ComponentMetadata {
+  name: string;
+  filePath: string;
+  interfaces?: string[];
+  apiDependencies?: string[];
+}
+```
+
+**Smart positioning algorithm:**
+- Calculates tooltip dimensions
+- Adjusts position to keep within viewport
+- Handles both horizontal and vertical overflow
+
+#### 5. useInspect Hook (`/src/hooks/use-inspect.ts`)
+
+Simplified hook for component registration:
+
+```typescript
+const useInspect = (componentId: string, metadata: ComponentMetadata) => {
+  const { registerComponent } = useInspectContext();
+  
+  useEffect(() => {
+    registerComponent(componentId, metadata);
+  }, [componentId, metadata.name, metadata.filePath]);
+};
+```
+
+### Header Integration
+
+The inspect mode toggle is integrated into the header component:
+
+```typescript
+// Only show in development
+{isVibeInspectAvailable() && (
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={toggleInspectMode}
+    title={`Vibe Inspect: ${isInspectMode ? 'ON' : 'OFF'}`}
+  >
+    <Eye className={cn("h-4 w-4", isInspectMode && "text-blue-500")} />
+  </Button>
+)}
+```
+
+## Usage Examples
+
+### Basic Component Wrapping
+
+```typescript
+import { InspectOverlay } from '@/components/dev/inspect-overlay';
+
+export function MyComponent() {
+  return (
+    <InspectOverlay 
+      componentId="my-component"
+      metadata={{
+        name: "MyComponent",
+        filePath: "src/components/my-component.tsx",
+        interfaces: ["MyComponentProps"],
+        apiDependencies: ["useState", "useEffect"]
+      }}
+    >
+      <div>Component content</div>
+    </InspectOverlay>
+  );
+}
+```
+
+### Using the Hook Directly
+
+```typescript
+import { useInspect } from '@/hooks/use-inspect';
+
+export function MyComponent() {
+  useInspect('my-component', {
+    name: "MyComponent",
+    filePath: "src/components/my-component.tsx",
+    interfaces: ["MyComponentProps"],
+    apiDependencies: ["useState", "useEffect"]
+  });
+
+  return <div>Component content</div>;
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Infinite Re-render Error
+
+**Problem**: `Maximum update depth exceeded` error when using inspect mode.
+
+**Solution**: Ensure component metadata doesn't include complex objects in dependencies:
+
+```typescript
+// ❌ Bad - complex objects cause re-renders
+useEffect(() => {
+  registerComponent(id, metadata);
+}, [id, metadata]); // metadata object changes every render
+
+// ✅ Good - primitive values only
+useEffect(() => {
+  registerComponent(id, metadata);
+}, [id, metadata.name, metadata.filePath]);
+```
+
+#### 2. Tooltip Positioning Issues
+
+**Problem**: Tooltip appears off-screen or in wrong position.
+
+**Solution**: The smart positioning algorithm automatically handles this, but ensure:
+- Tooltip container has `position: fixed`
+- Z-index is high enough (`z-50` or higher)
+- Viewport boundaries are calculated correctly
+
+#### 3. Tooltip Shows on Component Hover
+
+**Problem**: Tooltip appears when hovering component instead of just the (i) icon.
+
+**Solution**: Ensure hover handlers are only on the icon element:
+
+```typescript
+// ❌ Bad - hover on entire overlay
+<div onMouseEnter={showTooltip}>
+  <div>Component</div>
+  <div>Icon</div>
+</div>
+
+// ✅ Good - hover only on icon
+<div>
+  <div>Component</div>
+  <div onMouseEnter={showTooltip}>Icon</div>
+</div>
+```
+
+## Testing
+
+### Playwright Integration
+
+A comprehensive test suite has been created to test the inspect mode functionality:
+
+```typescript
+// tests/debug-inspect.spec.ts
+test('capture homepage state and test inspect mode', async ({ page }) => {
+  await page.goto('/');
+  
+  // Check if inspect toggle is available
+  const inspectToggle = page.locator('button[title*="Vibe Inspect"]');
+  const isInspectAvailable = await inspectToggle.count() > 0;
+  
+  if (isInspectAvailable) {
+    // Enable inspect mode
+    await inspectToggle.click();
+    
+    // Test hover functionality
+    await page.locator('header').hover();
+    
+    // Check for tooltip
+    const tooltip = page.locator('[class*="fixed"][class*="z-"]')
+      .filter({ hasText: /(Header|Component|metadata)/i });
+    await expect(tooltip).toBeVisible();
+  }
+});
+```
+
+### MCP Integration
+
+The testing setup includes MCP (Model Context Protocol) integration for enhanced debugging:
+
+- **Screenshots**: Automatic capture of page states
+- **DOM inspection**: Save complete HTML structure
+- **Console monitoring**: Capture console logs and errors
+- **Real-time debugging**: Interactive test debugging
+
+## Performance Considerations
+
+### Development Mode Only
+
+- All inspect components are tree-shaken in production builds
+- No runtime overhead in production
+- Context providers return null in production
+
+### Memory Management
+
+- Component metadata stored in WeakMap for automatic cleanup
+- Event listeners properly cleaned up on unmount
+- Tooltip positioning calculations optimized
+
+## File Structure
+
+```
+src/
+├── components/dev/
+│   ├── inspect-overlay.tsx      # Wrapper component
+│   └── inspect-tooltip.tsx      # Tooltip display
+├── contexts/
+│   └── inspect-context.tsx      # State management
+├── hooks/
+│   └── use-inspect.ts          # Registration hook
+└── utils/
+    └── dev-mode.ts             # Environment detection
+```
+
+## Future Enhancements
+
+### Planned Features
+
+1. **Component Tree Visualization**: Show component hierarchy
+2. **Props Inspection**: Display current prop values
+3. **State Debugging**: Show component state
+4. **Performance Metrics**: Render timing and re-render counts
+5. **Export Functionality**: Save component metadata to JSON
+
+### Technical Improvements
+
+1. **Virtual Scrolling**: For large component lists
+2. **Search/Filter**: Find specific components
+3. **Keyboard Navigation**: Navigate without mouse
+4. **Custom Metadata**: User-defined inspection data
+5. **Integration APIs**: Plugin system for custom tools
+
+## Best Practices
+
+### Component Registration
+
+1. **Unique IDs**: Use descriptive, unique component identifiers
+2. **Accurate Metadata**: Keep file paths and interface names current
+3. **Minimal Dependencies**: Only include actual API dependencies
+4. **Consistent Naming**: Follow project naming conventions
+
+### Performance
+
+1. **Conditional Rendering**: Always wrap in development checks
+2. **Memoization**: Use `useMemo`/`useCallback` for expensive operations
+3. **Event Cleanup**: Remove listeners on component unmount
+4. **Lazy Loading**: Load inspect components only when needed
+
+### Testing
+
+1. **Development Detection**: Test both dev and production modes
+2. **User Interactions**: Test hover, click, and keyboard interactions
+3. **Error Handling**: Test error scenarios and edge cases
+4. **Cross-browser**: Test on multiple browsers and viewports
+
+## Conclusion
+
+The Vibe Inspect Mode provides a powerful development tool for understanding component structure and debugging React applications. Its non-intrusive design and comprehensive metadata display make it an invaluable addition to the developer toolkit while maintaining zero impact on production builds.

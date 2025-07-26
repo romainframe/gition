@@ -14,9 +14,11 @@ import {
   Target,
 } from "lucide-react";
 
+import { InspectOverlay } from "@/components/dev/inspect-overlay";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLanguage } from "@/contexts/language-context";
+import { useComponentInspect } from "@/hooks/use-inspect";
 import { cn } from "@/lib/utils";
 import {
   type DirectoryNode,
@@ -25,6 +27,13 @@ import {
 import { GitionConfig } from "@/types/config";
 
 import { useConfig } from "./config-provider";
+
+// Format display name: capitalize first letter and replace dashes/underscores with spaces
+function formatDisplayName(name: string): string {
+  return name
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 interface TreeNodeProps {
   node: DirectoryNode;
@@ -126,11 +135,11 @@ function TreeNode({ node, level = 0, basePath = "" }: TreeNodeProps) {
               className="truncate hover:underline"
               title={node.name}
             >
-              {node.name.replace(/\.(md|mdx)$/, "")}
+              {formatDisplayName(node.name.replace(/\.(md|mdx)$/, ""))}
             </Link>
           ) : (
             <span className="truncate" title={node.name}>
-              {node.name}
+              {formatDisplayName(node.name)}
             </span>
           )}
         </div>
@@ -195,6 +204,17 @@ export function Sidebar() {
   } = useStructureStore();
   const { t } = useLanguage();
 
+  // Register component for inspection
+  useComponentInspect({
+    componentId: "sidebar",
+    name: "Sidebar",
+    filePath: "src/components/sidebar.tsx",
+    description: "Navigation sidebar showing documentation and task structure",
+    interfaces: ["DirectoryNode", "TreeNodeProps", "SidebarSectionProps"],
+    apiDependencies: ["/api/structure"],
+    storeDependencies: ["useStructureStore"],
+  });
+
   useEffect(() => {
     if (!structure) {
       console.log("📁 Fetching structure for sidebar");
@@ -235,35 +255,37 @@ export function Sidebar() {
   }
 
   return (
-    <div className="w-72 border-r border-border/40 bg-background/30">
-      <ScrollArea className="h-[calc(100vh-4rem)] no-scrollbar">
-        <div className="p-6">
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-foreground mb-3">
-              {t("sidebar.workspace")}
-            </h3>
-            <div className="rounded-lg bg-muted/50 p-3">
-              <p className="text-xs text-muted-foreground font-mono break-all leading-relaxed">
-                {structure.paths.target}
-              </p>
+    <InspectOverlay componentId="sidebar">
+      <div className="w-72 h-full border-r border-border/40 bg-background/95 backdrop-blur-sm">
+        <ScrollArea className="h-full no-scrollbar">
+          <div className="p-6">
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                {t("sidebar.workspace")}
+              </h3>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs text-muted-foreground font-mono break-all leading-relaxed">
+                  {structure.paths.target}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <SidebarSection
+                title={t("sidebar.documentation")}
+                nodes={structure.docs}
+                basePath="/docs"
+              />
+
+              <SidebarSection
+                title={t("sidebar.tasks")}
+                nodes={structure.tasks}
+                basePath="/tasks"
+              />
             </div>
           </div>
-
-          <div className="space-y-6">
-            <SidebarSection
-              title={t("sidebar.documentation")}
-              nodes={structure.docs}
-              basePath="/docs"
-            />
-
-            <SidebarSection
-              title={t("sidebar.tasks")}
-              nodes={structure.tasks}
-              basePath="/tasks"
-            />
-          </div>
-        </div>
-      </ScrollArea>
-    </div>
+        </ScrollArea>
+      </div>
+    </InspectOverlay>
   );
 }

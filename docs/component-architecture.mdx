@@ -1,0 +1,629 @@
+---
+title: "Component Architecture"
+description: "Detailed overview of Gition's React component architecture, including component hierarchy, patterns, and UI composition strategies"
+type: "reference"
+category: "documentation"
+section: "architecture"
+tags: ["components", "react", "ui", "frontend", "patterns"]
+author: "Development Team"
+status: "published"
+version: "1.0.0"
+---
+
+# Component Architecture
+
+Gition's frontend is built using React with Next.js App Router, following modern component patterns and best practices. This document outlines the component architecture, design patterns, and composition strategies.
+
+## Component Hierarchy Overview
+
+```mermaid
+graph TB
+    A[App Layout] --> B[Header]
+    A --> C[Sidebar]
+    A --> D[Main Content]
+    A --> E[Theme Provider]
+    A --> F[File Watcher Provider]
+
+    B --> G[Language Toggle]
+    B --> H[Theme Toggle]
+    B --> I[Search Component]
+
+    C --> J[File Tree]
+    C --> K[Navigation State]
+
+    D --> L[Documentation Pages]
+    D --> M[Task Pages]
+    D --> N[Kanban Board]
+
+    L --> O[MDX Renderer]
+    L --> P[Interactive Markdown]
+
+    M --> Q[Task Detail View]
+    M --> R[Task List]
+
+    N --> S[Kanban Columns]
+    S --> T[Task Cards]
+
+    style A fill:#e3f2fd
+    style D fill:#f3e5f5
+    style E fill:#e8f5e8
+    style F fill:#fff3e0
+```
+
+## Core Layout Components
+
+### App Layout Structure
+
+```mermaid
+graph LR
+    A[RootLayout] --> B[Theme Provider]
+    B --> C[Config Provider]
+    C --> D[File Watcher Provider]
+    D --> E[Language Context]
+    E --> F[Layout Container]
+
+    F --> G[Header Bar]
+    F --> H[Main Grid]
+
+    H --> I[Sidebar Column]
+    H --> J[Content Column]
+
+    I --> K[File Navigation]
+    J --> L[Page Content]
+```
+
+**Root Layout (`src/app/layout.tsx`):**
+
+```typescript
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <ThemeProvider>
+          <ConfigProvider>
+            <FileWatcherProvider>
+              <LanguageProvider>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <div className="flex">
+                    <Sidebar />
+                    <main className="flex-1">
+                      {children}
+                    </main>
+                  </div>
+                </div>
+              </LanguageProvider>
+            </FileWatcherProvider>
+          </ConfigProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Provider Architecture
+
+```mermaid
+graph TB
+    A[Context Providers] --> B[Theme Provider]
+    A --> C[Config Provider]
+    A --> D[File Watcher Provider]
+    A --> E[Language Context]
+    A --> F[Inspect Context]
+
+    B --> G[Dark/Light Mode]
+    B --> H[Color Scheme]
+
+    C --> I[Gition Config]
+    C --> J[Feature Flags]
+
+    D --> K[Real-time Updates]
+    D --> L[File Change Events]
+
+    E --> M[Internationalization]
+    E --> N[Language Switching]
+
+    F --> O[Development Tools]
+    F --> P[Debug Overlays]
+```
+
+## Page-Level Components
+
+### Documentation Pages
+
+```mermaid
+graph TB
+    A[docs/page.tsx] --> B[Document List View]
+    B --> C[Document Cards]
+    B --> D[Search Results]
+    B --> E[Category Filters]
+
+    F[docs/[slug]/page.tsx] --> G[Document Detail View]
+    G --> H[MDX Renderer]
+    G --> I[Table of Contents]
+    G --> J[Navigation Links]
+    G --> K[Metadata Display]
+
+    H --> L[Interactive Markdown]
+    L --> M[Task Checkboxes]
+    L --> N[Code Syntax Highlighting]
+    L --> O[Link Processing]
+```
+
+### Task Management Pages
+
+```mermaid
+graph TB
+    A[tasks/page.tsx] --> B[Task Overview]
+    B --> C[Task Groups List]
+    B --> D[Progress Statistics]
+    B --> E[Quick Actions]
+
+    F[tasks/[...slug]/page.tsx] --> G[Task Detail View]
+    G --> H[Task Metadata Editor]
+    G --> I[Subtask List]
+    G --> J[File Content View]
+    G --> K[Status Management]
+
+    L[tasks/kanban/page.tsx] --> M[Kanban Board]
+    M --> N[Column Layout]
+    N --> O[Todo Column]
+    N --> P[In Progress Column]
+    N --> Q[Done Column]
+
+    O --> R[Task Cards]
+    P --> R
+    Q --> R
+```
+
+## UI Component Library
+
+### shadcn/ui Integration
+
+```mermaid
+graph TB
+    A[UI Components] --> B[Form Components]
+    A --> C[Layout Components]
+    A --> D[Feedback Components]
+    A --> E[Navigation Components]
+
+    B --> F[Button]
+    B --> G[Input]
+    B --> H[Select]
+    B --> I[Textarea]
+    B --> J[Checkbox]
+
+    C --> K[Card]
+    C --> L[Dialog]
+    C --> M[Tabs]
+    C --> N[Separator]
+
+    D --> O[Alert]
+    D --> P[Badge]
+    D --> Q[Progress]
+
+    E --> R[Dropdown Menu]
+    E --> S[Scroll Area]
+```
+
+### Custom Interactive Components
+
+```typescript
+// Interactive Markdown Component
+interface InteractiveMarkdownProps {
+  content: string;
+  taskGroupId?: string;
+  tasks?: TaskItem[];
+  className?: string;
+}
+
+// Interactive Checkbox Component
+interface InteractiveCheckboxProps {
+  taskId: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}
+
+// Task Metadata Editor
+interface TaskMetadataEditorProps {
+  taskId: string;
+  metadata: TaskMetadata;
+  onSave: (metadata: TaskMetadata) => void;
+}
+```
+
+## State Management Patterns
+
+### Zustand Store Integration
+
+```mermaid
+graph TB
+    A[Component Layer] --> B[Store Selectors]
+    B --> C[useTaskStore]
+    B --> D[useDocsStore]
+    B --> E[useStructureStore]
+
+    C --> F[Task Data]
+    C --> G[Kanban State]
+    C --> H[CRUD Operations]
+
+    D --> I[Document Index]
+    D --> J[Search State]
+
+    E --> K[File Tree]
+    E --> L[Navigation State]
+
+    F --> M[Component Updates]
+    G --> M
+    H --> M
+    I --> M
+    J --> M
+    K --> M
+    L --> M
+```
+
+### Component-Store Connection Patterns
+
+```typescript
+// Store subscription with selectors
+function TaskListComponent() {
+  const tasks = useTaskStore((state) => state.taskGroups);
+  const loading = useTaskStore((state) => state.loading);
+  const refresh = useTaskStore((state) => state.refresh);
+
+  // Component renders tasks...
+}
+
+// Optimized subscriptions to prevent unnecessary re-renders
+const taskSelector = (state: TaskState) => ({
+  tasks: state.taskGroups,
+  loading: state.loading,
+});
+
+function OptimizedComponent() {
+  const { tasks, loading } = useTaskStore(taskSelector, shallow);
+  // Component only re-renders when tasks or loading change
+}
+```
+
+## Component Design Patterns
+
+### Composition over Inheritance
+
+```mermaid
+graph LR
+    A[Base Components] --> B[Composed Features]
+
+    A --> C[Card]
+    A --> D[Button]
+    A --> E[Input]
+
+    B --> F[TaskCard = Card + Badge + Button]
+    B --> G[SearchInput = Input + Icon + Dropdown]
+    B --> H[MetadataEditor = Form + Inputs + Dialog]
+```
+
+### Render Props Pattern
+
+```typescript
+// File Tree Component with render props
+interface FileTreeProps {
+  renderFile: (file: FileNode) => React.ReactNode;
+  renderDirectory: (dir: DirectoryNode) => React.ReactNode;
+  onSelect: (path: string) => void;
+}
+
+function FileTree({ renderFile, renderDirectory, onSelect }: FileTreeProps) {
+  // Tree traversal logic
+  return (
+    <div>
+      {structure.map(node =>
+        node.type === 'file'
+          ? renderFile(node)
+          : renderDirectory(node)
+      )}
+    </div>
+  );
+}
+```
+
+### Higher-Order Components
+
+```typescript
+// With file watching capabilities
+function withFileWatcher<T>(Component: React.ComponentType<T>) {
+  return function WrappedComponent(props: T) {
+    useFileWatcher(); // Hook that manages file watching
+    return <Component {...props} />;
+  };
+}
+
+// With loading states
+function withLoading<T>(Component: React.ComponentType<T>) {
+  return function LoadingWrapper(props: T & { loading?: boolean }) {
+    if (props.loading) {
+      return <div>Loading...</div>;
+    }
+    return <Component {...props} />;
+  };
+}
+```
+
+## Event Handling Architecture
+
+### File Change Event Flow
+
+```mermaid
+sequenceDiagram
+    participant FS as File System
+    participant FW as File Watcher Hook
+    participant S as Zustand Store
+    participant C as Components
+    participant UI as User Interface
+
+    FS->>FW: File change event
+    FW->>S: Trigger store refresh
+    S->>S: Update state
+    S->>C: Notify subscribers
+    C->>UI: Re-render with new data
+
+    Note over FW,S: Debounced updates
+    Note over S,C: Selective subscriptions
+```
+
+### User Interaction Patterns
+
+```mermaid
+graph TB
+    A[User Action] --> B[Event Handler]
+    B --> C[Optimistic Update]
+    B --> D[API Call]
+
+    C --> E[Immediate UI Feedback]
+    D --> F[Server Processing]
+    F --> G[File System Write]
+    G --> H[File Change Event]
+    H --> I[Store Verification]
+
+    I --> J[Success: Keep State]
+    I --> K[Error: Revert State]
+```
+
+## Performance Optimization Strategies
+
+### Memoization Patterns
+
+```typescript
+// Component memoization
+const TaskCard = React.memo(({ task, onUpdate }) => {
+  // Only re-render when task changes
+  return <Card>...</Card>;
+}, (prevProps, nextProps) => {
+  return prevProps.task.id === nextProps.task.id &&
+         prevProps.task.status === nextProps.task.status;
+});
+
+// Callback memoization
+function TaskList() {
+  const handleTaskUpdate = useCallback((taskId: string, updates: any) => {
+    updateTask(taskId, updates);
+  }, [updateTask]);
+
+  // Stable reference prevents child re-renders
+  return tasks.map(task =>
+    <TaskCard key={task.id} task={task} onUpdate={handleTaskUpdate} />
+  );
+}
+```
+
+### Virtual Scrolling (Future Enhancement)
+
+```mermaid
+graph TB
+    A[Large Task List] --> B[Viewport Calculation]
+    B --> C[Visible Items]
+    C --> D[Render Window]
+
+    D --> E[Before Buffer]
+    D --> F[Visible Items]
+    D --> G[After Buffer]
+
+    E --> H[Empty Spacer]
+    F --> I[Actual Components]
+    G --> J[Empty Spacer]
+
+    style I fill:#c8e6c9
+```
+
+### Code Splitting Strategy
+
+```typescript
+// Page-level code splitting
+const KanbanBoard = dynamic(() => import('./kanban-board'), {
+  loading: () => <div>Loading kanban...</div>
+});
+
+// Component-level splitting for heavy features
+const TaskMetadataEditor = dynamic(() => import('./task-metadata-editor'), {
+  ssr: false // Client-side only
+});
+
+// Route-based splitting with Next.js App Router
+// Automatic for page components
+```
+
+## Responsive Design Architecture
+
+### Breakpoint System
+
+```mermaid
+graph LR
+    A[Mobile First] --> B[sm: 640px]
+    B --> C[md: 768px]
+    C --> D[lg: 1024px]
+    D --> E[xl: 1280px]
+    E --> F[2xl: 1536px]
+
+    A --> G[Single Column]
+    B --> H[Stacked Layout]
+    C --> I[Sidebar + Content]
+    D --> J[Full Layout]
+    E --> K[Wide Layout]
+    F --> L[Ultra Wide]
+```
+
+### Adaptive Component Patterns
+
+```typescript
+// Responsive sidebar
+function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  return (
+    <>
+      {isMobile ? (
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SidebarContent />
+        </Sheet>
+      ) : (
+        <aside className="w-64 border-r">
+          <SidebarContent />
+        </aside>
+      )}
+    </>
+  );
+}
+```
+
+## Accessibility Architecture
+
+### ARIA Integration
+
+```typescript
+// Accessible task management
+function TaskCard({ task, onToggle }) {
+  return (
+    <div
+      role="listitem"
+      aria-labelledby={`task-${task.id}`}
+      aria-describedby={`task-desc-${task.id}`}
+    >
+      <button
+        onClick={() => onToggle(task.id)}
+        aria-label={`Mark ${task.title} as ${task.completed ? 'incomplete' : 'complete'}`}
+        aria-pressed={task.completed}
+      >
+        <Checkbox checked={task.completed} />
+      </button>
+      <h3 id={`task-${task.id}`}>{task.title}</h3>
+      <p id={`task-desc-${task.id}`}>{task.description}</p>
+    </div>
+  );
+}
+```
+
+### Keyboard Navigation
+
+```mermaid
+graph TB
+    A[Keyboard Events] --> B[Focus Management]
+    B --> C[Tab Navigation]
+    B --> D[Arrow Key Navigation]
+    B --> E[Enter/Space Actions]
+
+    C --> F[Sequential Tab Order]
+    D --> G[List Navigation]
+    E --> H[Button Activation]
+
+    F --> I[Skip Links]
+    G --> J[Tree Navigation]
+    H --> K[Form Submission]
+```
+
+## Testing Architecture
+
+### Component Testing Strategy
+
+```typescript
+// Unit tests for components
+describe('TaskCard', () => {
+  it('renders task information correctly', () => {
+    const task = createMockTask();
+    render(<TaskCard task={task} onUpdate={jest.fn()} />);
+
+    expect(screen.getByText(task.title)).toBeInTheDocument();
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('handles status toggle', async () => {
+    const onUpdate = jest.fn();
+    const task = createMockTask();
+    render(<TaskCard task={task} onUpdate={onUpdate} />);
+
+    await user.click(screen.getByRole('checkbox'));
+    expect(onUpdate).toHaveBeenCalledWith(task.id, { completed: true });
+  });
+});
+```
+
+### Integration Testing
+
+```mermaid
+graph TB
+    A[Integration Tests] --> B[Store + Components]
+    A --> C[API + UI Flow]
+    A --> D[File System + Updates]
+
+    B --> E[Task CRUD Operations]
+    C --> F[Real-time Updates]
+    D --> G[File Change Propagation]
+
+    E --> H[UI State Consistency]
+    F --> I[Event Flow Validation]
+    G --> J[Data Synchronization]
+```
+
+## Development Tools Integration
+
+### React DevTools
+
+```typescript
+// Component debugging
+if (process.env.NODE_ENV === "development") {
+  // Enable additional debugging
+  window.__GITION_DEBUG__ = {
+    stores: { useTaskStore, useDocsStore, useStructureStore },
+    utils: { refreshAll, clearCache },
+  };
+}
+```
+
+### Hot Module Replacement
+
+```mermaid
+graph LR
+    A[Code Change] --> B[Next.js HMR]
+    B --> C[Component Update]
+    C --> D[Preserve State]
+    D --> E[Update UI]
+
+    B --> F[Store Update]
+    F --> G[Re-hydrate Data]
+    G --> E
+```
+
+This component architecture provides:
+
+- **Scalable organization** with clear separation of concerns
+- **Reusable patterns** for consistent development
+- **Performance optimization** through memoization and code splitting
+- **Accessibility** built into core components
+- **Testing strategy** for reliable component behavior
+- **Development experience** with hot reloading and debugging tools

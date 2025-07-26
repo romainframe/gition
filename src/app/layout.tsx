@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { ConfigProvider } from "@/components/config-provider";
+import { InspectTooltip } from "@/components/dev/inspect-tooltip";
 import { FileWatcherProvider } from "@/components/file-watcher-provider";
 import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { InspectProvider } from "@/contexts/inspect-context";
 import { LanguageProvider } from "@/contexts/language-context";
 
 import "./globals.css";
@@ -44,19 +46,24 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <LanguageProvider>
-              <FileWatcherProvider>
-                <div className="flex min-h-screen flex-col">
-                  <Header />
-                  <div className="flex flex-1">
-                    <Sidebar />
-                    <main className="flex-1 overflow-auto no-scrollbar">
-                      <div className="mx-auto max-w-screen-xl p-6 lg:p-8">
-                        {children}
+              <InspectProvider>
+                <FileWatcherProvider>
+                  <div className="flex min-h-screen flex-col">
+                    <Header />
+                    <div className="flex flex-1 relative">
+                      <div className="fixed left-0 top-16 bottom-0 z-10">
+                        <Sidebar />
                       </div>
-                    </main>
+                      <main className="flex-1 ml-72 overflow-auto no-scrollbar">
+                        <div className="mx-auto max-w-screen-xl p-6 lg:p-8">
+                          {children}
+                        </div>
+                      </main>
+                    </div>
+                    <InspectTooltip />
                   </div>
-                </div>
-              </FileWatcherProvider>
+                </FileWatcherProvider>
+              </InspectProvider>
             </LanguageProvider>
           </ThemeProvider>
         </ConfigProvider>

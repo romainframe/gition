@@ -53,3 +53,9 @@ TEST_CASES.md
 .gition/cache/
 .gition/logs/
 .gition/temp/
+src/app/docs/\[slug]/page.tsx
+
+
+# Playwright
+playwright-report/
+test-results/

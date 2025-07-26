@@ -1,0 +1,512 @@
+---
+title: "Data Flow & Processing"
+description: "Detailed explanation of how data flows through Gition's system from filesystem to UI"
+type: "reference"
+category: "documentation"
+section: "architecture"
+tags: ["data-flow", "processing", "pipeline", "technical"]
+author: "Development Team"
+status: "published"
+version: "1.0.0"
+---
+
+# Data Flow & Processing
+
+This document explains how data flows through Gition's system, from raw files on disk to rendered UI components. Understanding these flows is crucial for debugging, optimization, and extending the system.
+
+## Overview: File-to-UI Pipeline
+
+```mermaid
+graph TB
+    A[File System<br/>*.md, *.mdx] --> B[File Watcher<br/>Chokidar]
+    B --> C[Change Detection]
+    C --> D[Event Broadcasting<br/>Server-Sent Events]
+    D --> E[Client Reception<br/>useFileWatcher]
+    E --> F[Store Updates<br/>Zustand]
+    F --> G[UI Re-render<br/>React]
+
+    A --> H[Initial Scan<br/>Startup]
+    H --> I[Bulk Processing]
+    I --> J[Store Hydration]
+    J --> G
+
+    style A fill:#e1f5fe
+    style G fill:#c8e6c9
+```
+
+## File System Layer
+
+### Directory Structure Processing
+
+```mermaid
+graph LR
+    A[Target Directory] --> B[Scan Process]
+    B --> C[docs/ Directory]
+    B --> D[tasks/ Directory]
+    B --> E[.gitionrc/ Config]
+
+    C --> F[*.md Files]
+    C --> G[*.mdx Files]
+    C --> H[Subdirectories]
+
+    D --> I[Epic Files<br/>epics/]
+    D --> J[Story Files<br/>stories/]
+    D --> K[Custom Types]
+
+    F --> L[File Metadata]
+    G --> L
+    I --> L
+    J --> L
+    K --> L
+
+    L --> M[Structure Store]
+    L --> N[Content Processing]
+```
+
+### File Reading & Parsing
+
+```typescript
+// File processing pipeline
+interface FileProcessingPipeline {
+  1: "Read file from disk";
+  2: "Parse frontmatter (YAML)";
+  3: "Extract document metadata";
+  4: "Parse task checkboxes";
+  5: "Compile MDX content";
+  6: "Generate derived data";
+  7: "Update stores";
+  8: "Trigger UI updates";
+}
+```
+
+## Content Processing Pipeline
+
+### 1. Frontmatter Extraction
+
+```mermaid
+graph TB
+    A[Raw File Content] --> B[Split at '---']
+    B --> C[YAML Section]
+    B --> D[Markdown Content]
+
+    C --> E[yaml.parse()]
+    E --> F[Frontmatter Object]
+
+    D --> G[Content String]
+
+    F --> H[Document Metadata]
+    G --> I[Task Extraction]
+    G --> J[MDX Processing]
+```
+
+**Code Flow:**
+
+```typescript
+// src/lib/mdx.ts - parseFrontmatter()
+const sections = content.split('---').filter(Boolean);
+if (sections.length >= 2) {
+  const frontmatter = yaml.parse(sections[0]);
+  const markdown = sections.slice(1).join('---');
+  return { frontmatter, content: markdown };
+}
+```
+
+### 2. Task Extraction Process
+
+```mermaid
+graph TB
+    A[Markdown Content] --> B[Line-by-Line Scan]
+    B --> C[Checkbox Pattern<br/>^\s*-\s*\[([ xX~])\]\s*(.+)$]
+
+    C --> D[Parse Task Status]
+    C --> E[Extract Task Text]
+
+    D --> F[Status Mapping<br/>[ ]=todo, [x]=done, [~]=in_progress]
+    E --> G[Metadata Parsing]
+
+    G --> H[Priority: (high), (medium), (low)]
+    G --> I[Assignee: +username]
+    G --> J[Due Date: @2024-01-15]
+    G --> K[References: ref:epics/epic-01]
+    G --> L[Tags: #frontend #ui]
+
+    F --> M[TaskItem Object]
+    H --> M
+    I --> M
+    J --> M
+    K --> M
+    L --> M
+```
+
+**Advanced Task Syntax:**
+
+```markdown
+- [ ] Basic task
+- [x] Completed task
+- [~] In progress task
+- [ ] Complex task (high) +john @2024-02-01 #frontend ref:epics/auth-system
+```
+
+### 3. MDX Compilation
+
+```mermaid
+graph LR
+    A[Markdown + JSX] --> B[@next/mdx Compiler]
+    B --> C[React Components]
+    C --> D[Custom Components<br/>InteractiveMarkdown]
+    D --> E[Rendered Output]
+
+    B --> F[Syntax Highlighting]
+    B --> G[Link Processing]
+    B --> H[Image Optimization]
+
+    F --> E
+    G --> E
+    H --> E
+```
+
+## Real-Time Update Flow
+
+### File Change Detection
+
+```mermaid
+sequenceDiagram
+    participant FS as File System
+    participant CW as Chokidar Watcher
+    participant SE as SSE Endpoint
+    participant CH as Client Hook
+    participant ST as Zustand Stores
+    participant UI as React UI
+
+    FS->>CW: File modified event
+    CW->>CW: Filter .md/.mdx files
+    CW->>SE: Emit file change
+    SE->>CH: Send SSE event
+    CH->>CH: Determine affected stores
+    CH->>ST: Trigger refresh
+    ST->>ST: Re-process files
+    ST->>UI: Notify subscribers
+    UI->>UI: Re-render components
+```
+
+### Store Update Cascade
+
+```mermaid
+graph TB
+    A[File Change Event] --> B[Path Analysis]
+
+    B --> C[/docs/ path?]
+    B --> D[/tasks/ path?]
+    B --> E[Other path?]
+
+    C --> F[Docs Store Refresh]
+    D --> G[Task Store Refresh]
+    E --> H[All Stores Refresh]
+
+    F --> I[Re-parse Documents]
+    G --> J[Re-extract Tasks]
+    H --> I
+    H --> J
+
+    I --> K[Update Document Index]
+    J --> L[Update Task Groups]
+
+    K --> M[Trigger UI Updates]
+    L --> M
+
+    M --> N[Preserve Scroll Position]
+    M --> O[Maintain State]
+```
+
+### Debouncing Strategy
+
+```typescript
+// Prevent excessive updates during rapid file changes
+interface DebouncingConfig {
+  taskRefresh: 300; // ms - Task store updates
+  docsRefresh: 150; // ms - Docs store updates
+  uiUpdates: 100; // ms - UI re-renders
+  scrollPreserve: 50; // ms - Scroll position
+}
+```
+
+## Store Management
+
+### Task Store Data Flow
+
+```mermaid
+graph TB
+    A[File Changes] --> B[extractTasks()]
+    B --> C[Task Objects Array]
+
+    C --> D[Group by File]
+    D --> E[TaskGroup Objects]
+
+    E --> F[Calculate Statistics]
+    F --> G[Total/Completed/Pending]
+
+    G --> H[Kanban Organization]
+    H --> I[Todo Column]
+    H --> J[In Progress Column]
+    H --> K[Done Column]
+
+    E --> L[Store State Update]
+    I --> L
+    J --> L
+    K --> L
+
+    L --> M[Notify Subscribers]
+    M --> N[Component Re-render]
+```
+
+### Docs Store Data Flow
+
+```mermaid
+graph TB
+    A[MDX Files] --> B[Parse Each File]
+    B --> C[Extract Metadata]
+    C --> D[Generate Excerpts]
+    D --> E[Calculate Statistics]
+
+    E --> F[Word Count]
+    E --> G[Reading Time]
+    E --> H[Last Modified]
+
+    C --> I[Build Search Index]
+    I --> J[Title Index]
+    I --> K[Content Index]
+    I --> L[Tag Index]
+
+    F --> M[Docs Store Update]
+    G --> M
+    H --> M
+    J --> M
+    K --> M
+    L --> M
+
+    M --> N[UI Updates]
+```
+
+### Structure Store Data Flow
+
+```mermaid
+graph TB
+    A[Directory Scan] --> B[Build File Tree]
+    B --> C[Recursive Processing]
+
+    C --> D[Directory Nodes]
+    C --> E[File Nodes]
+
+    D --> F[Child Mapping]
+    E --> G[File Metadata]
+
+    F --> H[Hierarchical Structure]
+    G --> H
+
+    H --> I[Navigation State]
+    I --> J[Expanded Folders]
+    I --> K[Selected Files]
+
+    H --> L[Structure Store]
+    J --> L
+    K --> L
+
+    L --> M[Sidebar Updates]
+```
+
+## UI Update Propagation
+
+### Component Subscription Model
+
+```mermaid
+graph TB
+    A[Zustand Store Changes] --> B[Subscribed Components]
+
+    B --> C[Task Components]
+    B --> D[Docs Components]
+    B --> E[Sidebar Component]
+
+    C --> F[KanbanBoard]
+    C --> G[TaskDetail]
+    C --> H[TaskList]
+
+    D --> I[DocumentViewer]
+    D --> J[SearchResults]
+
+    E --> K[FileTree]
+    E --> L[NavigationState]
+
+    F --> M[Selective Re-render]
+    G --> M
+    H --> M
+    I --> M
+    J --> M
+    K --> M
+    L --> M
+```
+
+### Optimization Strategies
+
+```typescript
+// Memoization patterns for performance
+const optimizations = {
+  // Prevent unnecessary re-renders
+  useMemo: ['Expensive calculations', 'Filtered data', 'Derived state'],
+
+  // Stable references for callbacks
+  useCallback: ['Event handlers', 'Store selectors', 'API calls'],
+
+  // Component-level optimization
+  React.memo: ['Pure components', 'List items', 'Static content'],
+
+  // Store-level optimization
+  shallowEqual: ['Store subscriptions', 'Prop comparisons']
+};
+```
+
+## Error Handling & Recovery
+
+### File Processing Errors
+
+```mermaid
+graph TB
+    A[File Processing] --> B[Error Detection]
+
+    B --> C[YAML Parse Error]
+    B --> D[MDX Compile Error]
+    B --> E[File Read Error]
+
+    C --> F[Skip Frontmatter]
+    D --> G[Fallback Rendering]
+    E --> H[Show File Missing]
+
+    F --> I[Log Warning]
+    G --> I
+    H --> I
+
+    I --> J[Continue Processing]
+    J --> K[Partial Success State]
+```
+
+### Store Recovery Patterns
+
+```typescript
+// Error boundaries and recovery
+interface ErrorRecovery {
+  parseError: "Continue with default values";
+  networkError: "Retry with exponential backoff";
+  storeError: "Reset to last known good state";
+  renderError: "Show error boundary component";
+}
+```
+
+## Performance Monitoring
+
+### Data Flow Metrics
+
+```mermaid
+graph LR
+    A[File Change] --> B[Detection Time]
+    B --> C[Processing Time]
+    C --> D[Store Update Time]
+    D --> E[Render Time]
+    E --> F[Total Latency]
+
+    B --> G[<50ms target]
+    C --> H[<100ms target]
+    D --> I[<25ms target]
+    E --> J[<16ms target]
+    F --> K[<200ms total]
+```
+
+### Bottleneck Identification
+
+```typescript
+// Performance monitoring points
+const performanceTracking = {
+  fileWatch: "Time from file change to detection",
+  parsing: "MDX/YAML parsing duration",
+  extraction: "Task extraction time",
+  storeUpdate: "Zustand state update time",
+  uiRender: "React render cycle time",
+  scrollPreserve: "Scroll position maintenance",
+};
+```
+
+## Data Persistence
+
+### Configuration Flow
+
+```mermaid
+graph TB
+    A[Configuration Changes] --> B[Validate Input]
+    B --> C[Update Memory State]
+    C --> D[Write to .gitionrc/config.yaml]
+    D --> E[Broadcast Change Event]
+    E --> F[Update UI State]
+    F --> G[Apply Theme Changes]
+    F --> H[Update Feature Flags]
+```
+
+### File System Synchronization
+
+```mermaid
+graph LR
+    A[UI Task Toggle] --> B[Optimistic Update]
+    B --> C[API Call]
+    C --> D[File System Write]
+    D --> E[File Change Event]
+    E --> F[Verification]
+    F --> G[Success: Keep State]
+    F --> H[Error: Revert State]
+```
+
+## Integration Points
+
+### External Tool Integration
+
+```mermaid
+graph TB
+    A[Git Hooks] --> B[File Change Trigger]
+    B --> C[Gition Refresh]
+
+    D[IDE Save] --> E[File Watcher]
+    E --> C
+
+    F[CLI Commands] --> G[Direct API Calls]
+    G --> H[Immediate Updates]
+
+    I[AI Tools] --> J[Automated Edits]
+    J --> E
+
+    C --> K[Real-time UI Updates]
+    H --> K
+```
+
+### Plugin Data Flow (Future)
+
+```mermaid
+graph TB
+    A[Plugin Registration] --> B[Hook Subscription]
+    B --> C[Data Flow Events]
+
+    C --> D[onFileLoad]
+    C --> E[onTaskToggle]
+    C --> F[onConfigChange]
+
+    D --> G[Plugin Processing]
+    E --> G
+    F --> G
+
+    G --> H[Plugin Output]
+    H --> I[System Integration]
+    I --> J[UI Updates]
+```
+
+This data flow architecture ensures:
+
+- **Consistency**: All data changes flow through well-defined pipelines
+- **Performance**: Optimized update cycles with minimal overhead
+- **Reliability**: Error handling and recovery at each stage
+- **Extensibility**: Clear integration points for future enhancements
+- **Debuggability**: Observable data transformations throughout the system

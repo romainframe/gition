@@ -27,6 +27,7 @@ just install
 ### 2. Development Commands
 
 Using pnpm:
+
 ```bash
 # Start development server
 pnpm dev
@@ -42,6 +43,7 @@ pnpm start
 ```
 
 Using just (recommended):
+
 ```bash
 # Show all available commands
 just
@@ -159,47 +161,115 @@ just verify
 
 ## Architecture
 
+For complete architectural details, see our [Technical Architecture Documentation](./technical-architecture.mdx).
+
 ### Frontend Architecture
 
-- **Next.js 15**: React framework with App Router
-- **TypeScript**: Type safety and better DX
-- **Tailwind CSS**: Utility-first styling
-- **shadcn/ui**: High-quality component library
-- **Zustand**: Lightweight state management
+```mermaid
+graph TB
+    A[Next.js App Router] --> B[React Components]
+    A --> C[API Routes]
+    A --> D[SSR/SSG]
 
-### State Management
+    B --> E[shadcn/ui Components]
+    B --> F[Custom Components]
+    B --> G[Zustand Stores]
 
-- **useTaskStore**: Task and project management
-- **useDocsStore**: Documentation state
-- **useStructureStore**: File system structure
-- **React Context**: Configuration and theming
+    C --> H[File Operations]
+    C --> I[Task Management]
+    C --> J[Real-time Events]
 
-### API Design
-
-RESTful API with consistent patterns:
-
-```typescript
-// Task management
-GET    /api/tasks           # List all tasks
-GET    /api/tasks/[id]      # Get specific task
-PATCH  /api/tasks/[id]      # Update task
-
-// File operations
-GET    /api/files/watch     # Server-sent events for file changes
-POST   /api/files/save      # Save file content
-
-// Configuration
-GET    /api/config          # Get configuration
-POST   /api/config          # Update configuration
+    style A fill:#e3f2fd
+    style G fill:#f3e5f5
 ```
 
-### Real-time Updates
+**Key Technologies:**
 
-File watching using:
-- **chokidar**: Cross-platform file system watching
-- **Server-Sent Events**: Real-time communication
-- **Debounced updates**: Prevent excessive re-renders
-- **Scroll preservation**: Maintain user context
+- **Next.js 15**: React framework with App Router for optimal performance
+- **TypeScript**: Type safety and enhanced developer experience
+- **Tailwind CSS v4**: Utility-first styling with CSS custom properties
+- **shadcn/ui**: High-quality, accessible component library
+- **Zustand**: Lightweight state management with minimal boilerplate
+
+### State Management Architecture
+
+```mermaid
+graph LR
+    A[File System Events] --> B[Store Actions]
+    B --> C[useTaskStore]
+    B --> D[useDocsStore]
+    B --> E[useStructureStore]
+
+    C --> F[UI Components]
+    D --> F
+    E --> F
+
+    F --> G[User Interactions]
+    G --> H[API Calls]
+    H --> I[File System Changes]
+    I --> A
+```
+
+**Store Responsibilities:**
+
+- **useTaskStore**: Task data, kanban state, CRUD operations, progress tracking
+- **useDocsStore**: Document metadata, search functionality, content indexing
+- **useStructureStore**: File system tree, navigation state, folder expansion
+- **React Context**: Configuration, theming, language settings
+
+### Real-time Data Flow
+
+```mermaid
+sequenceDiagram
+    participant FS as File System
+    participant CW as Chokidar Watcher
+    participant SSE as Server-Sent Events
+    participant Hook as useFileWatcher
+    participant Store as Zustand Store
+    participant UI as React UI
+
+    FS->>CW: File change detected
+    CW->>SSE: Emit change event
+    SSE->>Hook: Send SSE message
+    Hook->>Store: Trigger store refresh
+    Store->>UI: Update components
+
+    Note over CW,SSE: Debounced updates
+    Note over Hook,Store: Optimistic updates
+```
+
+**Real-time Features:**
+
+- **File Watching**: Cross-platform file system monitoring with chokidar
+- **Server-Sent Events**: Efficient real-time communication
+- **Debounced Updates**: Prevent excessive re-renders during rapid file changes
+- **Scroll Preservation**: Maintain user context during content updates
+- **Optimistic Updates**: Immediate UI feedback with server verification
+
+### API Design Patterns
+
+RESTful API with real-time enhancements:
+
+```typescript
+// Task management endpoints
+GET    /api/tasks                    # List all task groups
+GET    /api/tasks/[...slug]          # Get specific task group
+PATCH  /api/task-management/[id]/status     # Update task status
+PATCH  /api/task-management/[id]/metadata   # Update task metadata
+PATCH  /api/subtasks/[taskId]/[subtaskId]   # Update subtask
+
+// File operations
+GET    /api/files/watch              # Server-sent events for changes
+GET    /api/structure                # File system structure
+GET    /api/docs                     # Document listing
+
+// Real-time kanban
+GET    /api/tasks/kanban             # Kanban board data
+
+// Configuration
+GET    /api/config                   # Get current configuration
+POST   /api/config                   # Update configuration
+```
 
 ## Contributing Guidelines
 
@@ -232,6 +302,7 @@ test: add unit tests for MDX parsing
 ### 4. Issue Reporting
 
 When reporting bugs:
+
 - Include reproduction steps
 - Specify environment (OS, Node version, etc.)
 - Provide sample files if relevant
@@ -255,6 +326,7 @@ just typecheck-watch
 ### 2. Common Issues
 
 **Port already in use:**
+
 ```bash
 # Kill process on port 3000
 npx kill-port 3000
@@ -264,6 +336,7 @@ just test-cli-dir . --port 3001
 ```
 
 **Module resolution errors:**
+
 ```bash
 # Clean and reinstall
 just reset
@@ -273,6 +346,7 @@ just fresh
 ```
 
 **TypeScript errors:**
+
 ```bash
 # Check types with strict mode
 just check-strict
@@ -342,6 +416,7 @@ just publish
 ### VS Code (Recommended)
 
 Install these extensions:
+
 - TypeScript and JavaScript Language Features
 - Tailwind CSS IntelliSense
 - ESLint

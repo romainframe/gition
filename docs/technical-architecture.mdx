@@ -1,0 +1,472 @@
+---
+title: "Technical Architecture"
+description: "Comprehensive overview of Gition's technical architecture, system design, and component interactions"
+type: "reference"
+category: "documentation"
+section: "architecture"
+tags: ["architecture", "technical", "system-design", "components"]
+author: "Development Team"
+status: "published"
+version: "1.0.0"
+---
+
+# Technical Architecture
+
+Gition is a zero-configuration local web application that serves Markdown/MDX files directly from your filesystem with real-time task management capabilities. This document provides a comprehensive technical overview of the system architecture.
+
+## System Overview
+
+```mermaid
+graph TB
+    CLI[CLI Tool<br/>npx gition] --> Server[Next.js Server<br/>localhost:3000]
+
+    Server --> Frontend[React Frontend<br/>App Router]
+    Server --> API[API Routes<br/>/api/*]
+    Server --> SSR[Server-Side Rendering<br/>MDX Processing]
+
+    Frontend --> UI[UI Components]
+    Frontend --> State[State Management<br/>Zustand Stores]
+    Frontend --> Hooks[Custom Hooks<br/>File Watching]
+
+    API --> FileAPI[File Operations]
+    API --> TaskAPI[Task Management]
+    API --> ConfigAPI[Configuration]
+    API --> Watch[File Watching<br/>Server-Sent Events]
+
+    FileAPI --> FS[Local Filesystem<br/>docs/ & tasks/]
+    TaskAPI --> FS
+    ConfigAPI --> Config[.gitionrc/config.yaml]
+
+    Watch --> Chokidar[Chokidar File Watcher]
+    Chokidar --> FS
+
+    SSR --> MDX[MDX Compiler<br/>@next/mdx]
+    MDX --> FS
+
+    State --> TaskStore[Task Store]
+    State --> DocsStore[Docs Store]
+    State --> StructStore[Structure Store]
+```
+
+## Core Components
+
+### 1. CLI Tool & Server
+
+```mermaid
+graph LR
+    A[npx gition] --> B[Parse CLI Args]
+    B --> C[Target Directory]
+    B --> D[Port Configuration]
+    B --> E[AI Mode Flag]
+
+    C --> F[Start Next.js Server]
+    D --> F
+    E --> F
+
+    F --> G[Scan File System]
+    G --> H[Initialize Watchers]
+    H --> I[Serve Web UI]
+```
+
+**Key Features:**
+
+- Zero-configuration startup
+- Automatic directory scanning for `.md` and `.mdx` files
+- Configurable port binding
+- AI-mode hooks for automation
+
+### 2. File System Integration
+
+```mermaid
+graph TB
+    A[File System] --> B[Chokidar Watcher]
+    B --> C[File Events<br/>add/change/remove]
+
+    C --> D[Event Filter<br/>.md/.mdx only]
+    D --> E[Server-Sent Events]
+    E --> F[Client Browser]
+
+    F --> G[useFileWatcher Hook]
+    G --> H[Store Updates]
+
+    H --> I[Task Store<br/>Refresh]
+    H --> J[Docs Store<br/>Refresh]
+    H --> K[Structure Store<br/>Refresh]
+
+    I --> L[UI Re-render]
+    J --> L
+    K --> L
+```
+
+**Implementation Details:**
+
+- **Watcher**: Uses `chokidar` for cross-platform file watching
+- **Events**: Real-time updates via Server-Sent Events (SSE)
+- **Filtering**: Only processes `.md` and `.mdx` files
+- **Debouncing**: Prevents excessive updates during rapid file changes
+
+### 3. MDX Processing Pipeline
+
+```mermaid
+graph LR
+    A[Raw MDX File] --> B[Parse Frontmatter]
+    B --> C[Extract Metadata]
+    C --> D[Parse Task Items]
+    D --> E[MDX Compilation]
+    E --> F[React Components]
+
+    B --> G[Document Metadata]
+    D --> H[Task Extraction]
+
+    G --> I[Docs Store]
+    H --> J[Task Store]
+
+    F --> K[Rendered UI]
+    I --> K
+    J --> K
+```
+
+**Processing Steps:**
+
+1. **Frontmatter Parsing**: Extract YAML metadata
+2. **Task Extraction**: Parse checkbox items with advanced syntax
+3. **MDX Compilation**: Convert to React components
+4. **State Hydration**: Update Zustand stores
+5. **UI Rendering**: Display in browser
+
+### 4. Task Management System
+
+```mermaid
+graph TB
+    A[Markdown Checkboxes] --> B[Task Parser]
+    B --> C[Task Objects]
+
+    C --> D[Task Classification]
+    D --> E[Epic]
+    D --> F[Story]
+    D --> G[Subtask]
+
+    E --> H[Kanban Board]
+    F --> H
+    G --> I[Task Detail View]
+
+    H --> J[Status Updates]
+    I --> J
+    J --> K[File System Write]
+    K --> L[Real-time Sync]
+```
+
+**Task Syntax Support:**
+
+```markdown
+- [ ] Todo item
+- [x] Completed item
+- [~] In progress item
+- [ ] Task with metadata {priority: high, assignee: "john", due: "2024-02-01"}
+- [ ] Task with reference ref:epics/user-authentication
+```
+
+## Data Models
+
+### Document Structure
+
+```typescript
+interface DocMeta {
+  id: string; // Unique identifier
+  title: string; // From frontmatter or H1
+  slug: string; // URL-safe identifier
+  path: string; // File system path
+  frontmatter: Record<string, any>; // YAML frontmatter
+  content: string; // Raw markdown content
+  excerpt?: string; // Auto-generated excerpt
+  lastModified: Date; // File modification time
+  wordCount: number; // Content statistics
+  readingTime: number; // Estimated reading time
+}
+```
+
+### Task Structure
+
+```typescript
+interface TaskItem {
+  id: string; // Unique task identifier
+  title: string; // Task description
+  completed: boolean; // Checkbox state
+  status: "todo" | "in_progress" | "done";
+  line: number; // Line number in file
+  file: string; // Source file path
+  type: "doc" | "epic" | "story" | "custom";
+  folder?: string; // Organizing folder
+  references?: string[]; // Cross-references
+  metadata?: {
+    // Extended metadata
+    priority?: "low" | "medium" | "high";
+    assignee?: string;
+    due_date?: string;
+    tags?: string[];
+    estimate?: number;
+  };
+}
+```
+
+### Configuration Schema
+
+```typescript
+interface GitionConfig {
+  name: string;
+  description?: string;
+  docsDir: string; // Documentation directory
+  tasksDir: string; // Tasks directory
+  theme: {
+    primaryColor: string;
+    darkMode: boolean;
+  };
+  features: {
+    taskManagement: boolean;
+    realTimeUpdates: boolean;
+    search: boolean;
+  };
+  taskTypes: Array<{
+    name: string;
+    folder: string;
+    icon: string;
+  }>;
+  users?: Array<{
+    name: string;
+    email: string;
+  }>;
+  defaultLanguage: string;
+}
+```
+
+## State Management Architecture
+
+```mermaid
+graph TB
+    A[UI Components] --> B[Zustand Stores]
+
+    B --> C[useTaskStore]
+    B --> D[useDocsStore]
+    B --> E[useStructureStore]
+
+    C --> F[Tasks Data]
+    C --> G[Kanban State]
+    C --> H[Task Groups]
+
+    D --> I[Documents]
+    D --> J[Search Index]
+
+    E --> K[File Tree]
+    E --> L[Directory Structure]
+
+    F --> M[File System Sync]
+    G --> M
+    H --> M
+    I --> M
+    J --> M
+    K --> M
+    L --> M
+
+    M --> N[API Endpoints]
+    N --> O[File Operations]
+```
+
+**Store Responsibilities:**
+
+- **Task Store**: Task data, kanban state, CRUD operations
+- **Docs Store**: Document metadata, search functionality
+- **Structure Store**: File system tree, navigation state
+
+## API Architecture
+
+### RESTful Endpoints
+
+```mermaid
+graph LR
+    A[Frontend] --> B[API Routes]
+
+    B --> C[/api/tasks]
+    B --> D[/api/docs]
+    B --> E[/api/config]
+    B --> F[/api/files/watch]
+
+    C --> G[Task CRUD]
+    D --> H[Doc Retrieval]
+    E --> I[Config Management]
+    F --> J[Real-time Events]
+
+    G --> K[File System]
+    H --> K
+    I --> L[Config Files]
+    J --> M[Chokidar Watcher]
+```
+
+### Real-time Communication
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant W as File Watcher
+    participant FS as File System
+
+    C->>S: Connect /api/files/watch
+    S->>W: Initialize chokidar
+    W->>FS: Watch directories
+    S->>C: SSE Connection established
+
+    FS->>W: File changed
+    W->>S: File change event
+    S->>C: SSE: file-change event
+    C->>C: Update UI state
+```
+
+## Performance Optimizations
+
+### 1. File Processing
+
+- **Debounced Updates**: Prevent excessive re-renders during file changes
+- **Selective Parsing**: Only process relevant file types
+- **Caching**: Cache processed MDX content
+- **Lazy Loading**: Load documents on demand
+
+### 2. UI Rendering
+
+- **React Server Components**: Reduce client-side JavaScript
+- **Memoization**: Prevent unnecessary re-renders
+- **Virtual Scrolling**: Handle large document lists
+- **Scroll Preservation**: Maintain user context during updates
+
+### 3. Memory Management
+
+- **Connection Cleanup**: Properly close SSE connections
+- **Watcher Lifecycle**: Clean up file watchers when unused
+- **Store Optimization**: Efficient state updates
+
+## Security Considerations
+
+### Local-First Design
+
+- **No External APIs**: All data stays on local machine
+- **File System Sandbox**: Restricted to specified directories
+- **Path Validation**: Prevent directory traversal attacks
+- **Content Sanitization**: Safe MDX rendering
+
+### Development vs Production
+
+```mermaid
+graph TB
+    A[Environment] --> B[Development]
+    A --> C[Production Build]
+
+    B --> D[Hot Reload]
+    B --> E[Debug Logging]
+    B --> F[Source Maps]
+
+    C --> G[Minified Assets]
+    C --> H[Optimized Images]
+    C --> I[Static Generation]
+```
+
+## Extensibility Points
+
+### 1. Plugin Architecture (Planned)
+
+```mermaid
+graph LR
+    A[Core System] --> B[Plugin API]
+    B --> C[File Processors]
+    B --> D[UI Extensions]
+    B --> E[Task Handlers]
+    B --> F[AI Integrations]
+```
+
+### 2. Hook System
+
+```typescript
+interface PluginHooks {
+  onFileLoad?: (doc: DocMeta) => void;
+  onFileChange?: (path: string) => void;
+  onTaskToggle?: (task: TaskItem) => void;
+  onTaskCreate?: (task: TaskItem) => void;
+  onTaskUpdate?: (task: TaskItem) => void;
+}
+```
+
+### 3. Configuration Extensions
+
+- Custom task types and workflows
+- Theme customization
+- Feature toggles
+- Directory structure overrides
+
+## Deployment Patterns
+
+### Local Development
+
+```bash
+# Standard development
+pnpm dev
+
+# CLI testing
+npx gition ./my-docs --port 3001
+```
+
+### Production Usage
+
+```bash
+# Global installation
+npm install -g gition-ui
+
+# Project-specific usage
+npx gition-ui ./project-docs
+```
+
+### Docker Integration (Future)
+
+```dockerfile
+FROM node:18-alpine
+COPY . /app
+WORKDIR /app
+RUN npm install -g gition-ui
+EXPOSE 3000
+CMD ["gition-ui", "/docs", "--port", "3000"]
+```
+
+## Monitoring & Debugging
+
+### Development Tools
+
+- **React DevTools**: Component state inspection
+- **Network Tab**: API request monitoring
+- **Console Logging**: File watcher events
+- **TypeScript**: Compile-time error checking
+
+### Performance Monitoring
+
+```typescript
+// Built-in performance tracking
+interface PerformanceMetrics {
+  fileWatchLatency: number;
+  mdxParseTime: number;
+  taskExtractionTime: number;
+  uiRenderTime: number;
+}
+```
+
+## Future Architecture Enhancements
+
+### Planned Features
+
+- **Collaboration Support**: Multi-user editing with conflict resolution
+- **Plugin Ecosystem**: Third-party extensions
+- **Enhanced Search**: Full-text search with indexing
+- **AI Integration**: Smart content suggestions and automation
+- **Cloud Sync**: Optional cloud backup and sync
+
+### Scalability Considerations
+
+- **Large File Sets**: Efficient handling of 1000+ documents
+- **Memory Usage**: Optimized for long-running sessions
+- **Network Efficiency**: Minimal bandwidth usage for updates
+- **Cross-Platform**: Consistent behavior across operating systems

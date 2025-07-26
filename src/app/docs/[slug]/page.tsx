@@ -11,8 +11,9 @@ import { marked } from "marked";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { InspectOverlay } from "@/components/dev/inspect-overlay";
 import { useLanguage } from "@/contexts/language-context";
+import { useComponentInspect } from "@/hooks/use-inspect";
 import { useDocsStore } from "@/store/useDocsStore";
 
 export default function DocPage() {
@@ -32,6 +33,17 @@ export default function DocPage() {
   // Get the specific document from the docs array
   const doc = getDocBySlug(slug || "");
 
+  // Register component for inspection
+  useComponentInspect({
+    componentId: "doc-detail-page",
+    name: "DocPage",
+    filePath: "src/app/docs/[slug]/page.tsx",
+    description: "Documentation detail page with markdown content rendering",
+    interfaces: ["DocMetadata", "DocContent"],
+    apiDependencies: ["/api/docs"],
+    storeDependencies: ["useDocsStore"],
+  });
+
   useEffect(() => {
     console.log("📄 DocPage - useEffect triggered");
     console.log("📄 Current slug:", slug);
@@ -48,7 +60,7 @@ export default function DocPage() {
       console.log("📄 No docs loaded, fetching all docs first");
       fetchDocs();
     }
-  }, [slug, docs.length, fetchDocs]);
+  }, [slug, docs.length, fetchDocs, doc?.slug]);
 
   // Handle scroll restoration for navigation
   useEffect(() => {
@@ -175,109 +187,114 @@ export default function DocPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Back Navigation */}
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/docs">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t("docs.backToDocumentation")}
-          </Link>
-        </Button>
-      </div>
-
-      {/* Document Header */}
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight leading-tight">
-            {title}
-          </h1>
-
-          {description && (
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              {description}
-            </p>
-          )}
-        </div>
-
-        {/* Metadata */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-          {date && (
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>{new Date(date).toLocaleDateString()}</span>
-            </div>
-          )}
-
-          {author && (
-            <div className="flex items-center gap-1">
-              <User className="h-4 w-4" />
-              <span>{author}</span>
-            </div>
-          )}
-
-          <div className="flex items-center gap-1">
-            <FileText className="h-4 w-4" />
-            <span>{doc.filename}</span>
+    <InspectOverlay componentId="doc-detail-page">
+      <div className="flex flex-col h-[calc(100vh-6rem)]">
+        {/* Fixed Info Section */}
+        <div className="flex-shrink-0 space-y-6 pb-6 border-b border-border/40">
+          {/* Back Navigation */}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/docs">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                {t("docs.backToDocumentation")}
+              </Link>
+            </Button>
           </div>
 
-          {status && (
-            <Badge
-              variant={
-                status === "published"
-                  ? "default"
-                  : status === "draft"
-                    ? "secondary"
-                    : "outline"
-              }
+          {/* Document Header */}
+          <div className="space-y-4">
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold tracking-tight leading-tight">
+                {title}
+              </h1>
+
+              {description && (
+                <p className="text-xl text-muted-foreground leading-relaxed">
+                  {description}
+                </p>
+              )}
+            </div>
+
+            {/* Metadata */}
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              {date && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>{new Date(date).toLocaleDateString()}</span>
+                </div>
+              )}
+
+              {author && (
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  <span>{author}</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-1">
+                <FileText className="h-4 w-4" />
+                <span>{doc.filename}</span>
+              </div>
+
+              {status && (
+                <Badge
+                  variant={
+                    status === "published"
+                      ? "default"
+                      : status === "draft"
+                        ? "secondary"
+                        : "outline"
+                  }
+                >
+                  {status === "published"
+                    ? t("docs.published")
+                    : status === "draft"
+                      ? t("docs.draft")
+                      : status === "archived"
+                        ? t("docs.archived")
+                        : status}
+                </Badge>
+              )}
+            </div>
+
+            {/* Debug button for testing */}
+            <Button
+              onClick={() => {
+                console.log("🔄 Manual refresh triggered");
+                fetchDocs();
+              }}
+              variant="outline"
+              size="sm"
             >
-              {status === "published"
-                ? t("docs.published")
-                : status === "draft"
-                  ? t("docs.draft")
-                  : status === "archived"
-                    ? t("docs.archived")
-                    : status}
-            </Badge>
-          )}
+              🔄 Manual Refresh (Debug)
+            </Button>
+
+            {/* Tags */}
+            {tags.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                {tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Debug button for testing */}
-        <Button
-          onClick={() => {
-            console.log("🔄 Manual refresh triggered");
-            fetchDocs();
-          }}
-          variant="outline"
-          size="sm"
-        >
-          🔄 Manual Refresh (Debug)
-        </Button>
-
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <Tag className="h-4 w-4 text-muted-foreground" />
-            {tags.map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
+        {/* Scrollable Content Section */}
+        <div className="flex-1 overflow-auto no-scrollbar pt-6">
+          <Card className="border-none shadow-none bg-transparent">
+            <CardContent className="p-0">
+              <div
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: marked(processedContent) }}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <Separator />
-
-      {/* Document Content */}
-      <Card className="border-none shadow-none bg-transparent">
-        <CardContent className="p-0">
-          <div
-            className="prose"
-            dangerouslySetInnerHTML={{ __html: marked(processedContent) }}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    </InspectOverlay>
   );
 }

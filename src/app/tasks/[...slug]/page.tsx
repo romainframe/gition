@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import path from "path";
 
+import { InspectOverlay } from "@/components/dev/inspect-overlay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,10 +33,10 @@ import {
 } from "@/components/ui/card";
 import { InteractiveMarkdown } from "@/components/ui/interactive-markdown";
 import { MetadataEditor } from "@/components/ui/metadata-editor";
-import { Separator } from "@/components/ui/separator";
 import { StatusEditor } from "@/components/ui/status-editor";
 import { TaskMetadataEditor } from "@/components/ui/task-metadata-editor";
 import { useLanguage } from "@/contexts/language-context";
+import { useComponentInspect } from "@/hooks/use-inspect";
 import { useTaskStore } from "@/store/useTaskStore";
 
 interface TaskItem {
@@ -285,6 +286,18 @@ export default function TaskDetailPage() {
   } = useTaskStore();
   const { t } = useLanguage();
 
+  // Register component for inspection
+  useComponentInspect({
+    componentId: "task-detail-page",
+    name: "TaskDetailPage",
+    filePath: "src/app/tasks/[...slug]/page.tsx",
+    description:
+      "Task detail page showing task metadata, content, and subtasks",
+    interfaces: ["TaskItem", "TaskGroup", "TaskFile", "TaskReference"],
+    apiDependencies: ["/api/tasks"],
+    storeDependencies: ["useTaskStore"],
+  });
+
   useEffect(() => {
     fetchTaskGroups();
   }, [fetchTaskGroups]);
@@ -427,167 +440,185 @@ export default function TaskDetailPage() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/tasks">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("tasks.backToTasks")}
-            </Link>
-          </Button>
-        </div>
+    <InspectOverlay componentId="task-detail-page">
+      <div className="flex flex-col h-[calc(100vh-6rem)]">
+        {/* Fixed Info Section */}
+        <div className="flex-shrink-0 space-y-6 pb-6 border-b border-border/40">
+          {/* Header */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/tasks">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  {t("tasks.backToTasks")}
+                </Link>
+              </Button>
+            </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            {taskFile.group && getGroupIcon(taskFile.group.type)}
-            <h1 className="text-4xl font-bold tracking-tight">
-              {taskFile.group?.name ||
-                path.basename(
-                  taskFile.filename,
-                  path.extname(taskFile.filename)
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                {taskFile.group && getGroupIcon(taskFile.group.type)}
+                <h1 className="text-4xl font-bold tracking-tight">
+                  {taskFile.group?.name ||
+                    path.basename(
+                      taskFile.filename,
+                      path.extname(taskFile.filename)
+                    )}
+                </h1>
+                {taskFile.group && (
+                  <Badge
+                    className={`${getGroupBadgeColor(taskFile.group.type)}`}
+                  >
+                    {taskFile.group.type}
+                  </Badge>
                 )}
-            </h1>
-            {taskFile.group && (
-              <Badge className={`${getGroupBadgeColor(taskFile.group.type)}`}>
-                {taskFile.group.type}
-              </Badge>
-            )}
-            {taskFile.group?.folder && (
-              <Badge variant="outline">{taskFile.group.folder}</Badge>
-            )}
+                {taskFile.group?.folder && (
+                  <Badge variant="outline">{taskFile.group.folder}</Badge>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>{taskFile.filename}</span>
+                </div>
+
+                {taskFile.group?.metadata?.author && (
+                  <div className="flex items-center gap-1">
+                    <User className="h-4 w-4" />
+                    <span>{taskFile.group.metadata.author}</span>
+                  </div>
+                )}
+
+                {taskFile.group?.metadata?.date && (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      {new Date(
+                        taskFile.group.metadata.date
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {taskFile.group?.metadata?.description && (
+                <p className="text-muted-foreground">
+                  {taskFile.group.metadata.description}
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              {taskFile.group && (
+                <TaskMetadataEditor
+                  taskId={taskFile.group.id}
+                  currentMetadata={taskFile.group.metadata}
+                />
+              )}
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={`/tasks/kanban?group=${encodeURIComponent(taskFile.group?.id || slug)}`}
+                >
+                  {t("tasks.viewKanban")}
+                </Link>
+              </Button>
+              {taskFile.tasks.length > 0 && (
+                <Badge variant="secondary" className="text-sm">
+                  {taskFile.tasks.length} tasks
+                </Badge>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              <span>{taskFile.filename}</span>
-            </div>
+          {/* Task Statistics */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Tasks
+                </CardTitle>
+                <ListTodo className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {taskFile.tasks.length}
+                </div>
+              </CardContent>
+            </Card>
 
-            {taskFile.group?.metadata?.author && (
-              <div className="flex items-center gap-1">
-                <User className="h-4 w-4" />
-                <span>{taskFile.group.metadata.author}</span>
-              </div>
-            )}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <Circle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {taskFile.tasks.filter((task) => !task.completed).length}
+                </div>
+              </CardContent>
+            </Card>
 
-            {taskFile.group?.metadata?.date && (
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {new Date(taskFile.group.metadata.date).toLocaleDateString()}
-                </span>
-              </div>
-            )}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Completed</CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {taskFile.tasks.filter((task) => task.completed).length}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-
-          {taskFile.group?.metadata?.description && (
-            <p className="text-muted-foreground">
-              {taskFile.group.metadata.description}
-            </p>
-          )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
-          {taskFile.group && (
-            <TaskMetadataEditor
-              taskId={taskFile.group.id}
-              currentMetadata={taskFile.group.metadata}
-            />
-          )}
-          <Button variant="outline" size="sm" asChild>
-            <Link
-              href={`/tasks/kanban?group=${encodeURIComponent(taskFile.group?.id || slug)}`}
-            >
-              {t("tasks.viewKanban")}
-            </Link>
-          </Button>
-          {taskFile.tasks.length > 0 && (
-            <Badge variant="secondary" className="text-sm">
-              {taskFile.tasks.length} tasks
-            </Badge>
-          )}
+        {/* Scrollable Content Section */}
+        <div className="flex-1 overflow-auto no-scrollbar pt-6">
+          <div className="space-y-6">
+            {/* Task Content */}
+            {taskFile.content && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Content</CardTitle>
+                  <CardDescription>
+                    Markdown content with interactive tasks
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <InteractiveMarkdown
+                    content={taskFile.content}
+                    taskGroupId={taskFile.group?.id || slug}
+                    tasks={taskFile.tasks}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Task List */}
+            {taskFile.tasks.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Task List</CardTitle>
+                  <CardDescription>
+                    All tasks found in this file
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TaskList
+                    tasks={taskFile.tasks}
+                    taskGroupId={taskFile.group?.id || slug}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* References */}
+            <TaskReferences references={references} />
+          </div>
         </div>
       </div>
-
-      <Separator />
-
-      {/* Task Statistics */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-            <ListTodo className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{taskFile.tasks.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Circle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {taskFile.tasks.filter((task) => !task.completed).length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {taskFile.tasks.filter((task) => task.completed).length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Task Content */}
-      {taskFile.content && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Content</CardTitle>
-            <CardDescription>
-              Markdown content with interactive tasks
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <InteractiveMarkdown
-              content={taskFile.content}
-              taskGroupId={taskFile.group?.id || slug}
-              tasks={taskFile.tasks}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Task List */}
-      {taskFile.tasks.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Task List</CardTitle>
-            <CardDescription>All tasks found in this file</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TaskList
-              tasks={taskFile.tasks}
-              taskGroupId={taskFile.group?.id || slug}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* References */}
-      <TaskReferences references={references} />
-    </div>
+    </InspectOverlay>
   );
 }

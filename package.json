@@ -35,6 +35,8 @@
     "bin/",
     "src/",
     "public/",
+    "docs/",
+    "tasks/",
     ".next/",
     "next.config.ts",
     "tsconfig.json",

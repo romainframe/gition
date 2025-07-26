@@ -83,8 +83,8 @@ export function getTargetDirectory(): string {
 
   const cwd = process.cwd();
 
-  const dataPath = path.join(cwd, "data");
-  if (fs.existsSync(dataPath)) {
+  if (fs.existsSync(path.join(cwd, "data", "docs"))) {
+    const dataPath = path.join(cwd, "data");
     return dataPath;
   }
 

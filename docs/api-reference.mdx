@@ -1,0 +1,488 @@
+# API Reference
+
+Gition provides a RESTful API for programmatic access to documentation and task management features.
+
+## Base URL
+
+When running locally: `http://localhost:3000/api`
+
+## Authentication
+
+Currently, no authentication is required for the local API. Future versions will support API keys and OAuth.
+
+## Rate Limiting
+
+No rate limiting is applied to the local API.
+
+## Content Type
+
+All POST/PATCH requests should use `Content-Type: application/json`.
+
+---
+
+## Configuration API
+
+### Get Configuration
+
+```http
+GET /api/config
+```
+
+**Response:**
+```json
+{
+  "name": "My Project",
+  "description": "Project documentation",
+  "docsDir": "docs",
+  "tasksDir": "tasks",
+  "theme": {
+    "primaryColor": "#3b82f6",
+    "darkMode": true
+  },
+  "features": {
+    "taskManagement": true,
+    "realTimeUpdates": true,
+    "search": true
+  }
+}
+```
+
+### Update Configuration
+
+```http
+POST /api/config
+```
+
+**Body:**
+```json
+{
+  "theme": {
+    "primaryColor": "#10b981"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Configuration updated"
+}
+```
+
+---
+
+## Documentation API
+
+### List Documents
+
+```http
+GET /api/docs
+```
+
+**Query Parameters:**
+- `search` - Filter by search term
+- `tag` - Filter by tag
+- `limit` - Number of results (default: 50)
+- `offset` - Pagination offset (default: 0)
+
+**Response:**
+```json
+{
+  "docs": [
+    {
+      "id": "getting-started",
+      "title": "Getting Started",
+      "slug": "getting-started",
+      "path": "docs/getting-started.mdx",
+      "frontmatter": {
+        "title": "Getting Started",
+        "tags": ["guide"],
+        "date": "2024-01-15"
+      },
+      "excerpt": "Quick start guide...",
+      "wordCount": 150,
+      "readingTime": 1
+    }
+  ],
+  "total": 1
+}
+```
+
+### Get Document
+
+```http
+GET /api/docs/[slug]
+```
+
+**Response:**
+```json
+{
+  "id": "getting-started",
+  "title": "Getting Started",
+  "content": "# Getting Started\n\nContent here...",
+  "frontmatter": {
+    "title": "Getting Started",
+    "tags": ["guide"]
+  },
+  "path": "docs/getting-started.mdx",
+  "lastModified": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## Tasks API
+
+### List Task Groups
+
+```http
+GET /api/tasks?view=groups
+```
+
+**Response:**
+```json
+{
+  "taskGroups": [
+    {
+      "id": "project-setup",
+      "name": "Project Setup",
+      "type": "epic",
+      "file": "tasks/project-setup.md",
+      "folder": "tasks",
+      "subtasks": [
+        {
+          "id": "task-1",
+          "title": "Install dependencies",
+          "completed": true,
+          "status": "done",
+          "line": 10,
+          "metadata": {
+            "priority": "high",
+            "assignee": "john.doe"
+          }
+        }
+      ],
+      "totalTasks": 5,
+      "completedTasks": 2,
+      "pendingTasks": 3
+    }
+  ]
+}
+```
+
+### Get Task Group
+
+```http
+GET /api/tasks/[id]
+```
+
+**Response:**
+```json
+{
+  "id": "project-setup",
+  "name": "Project Setup",
+  "content": "# Project Setup\n\n- [x] Install deps",
+  "frontmatter": {
+    "title": "Project Setup",
+    "type": "epic"
+  },
+  "subtasks": [...],
+  "metadata": {...}
+}
+```
+
+### Update Task Status
+
+```http
+PATCH /api/task-management/[taskId]/status
+```
+
+**Body:**
+```json
+{
+  "status": "done"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Task status updated"
+}
+```
+
+### Update Task Metadata
+
+```http
+PATCH /api/task-management/[taskId]/metadata
+```
+
+**Body:**
+```json
+{
+  "metadata": {
+    "priority": "high",
+    "assignee": "jane.doe",
+    "due_date": "2024-02-01"
+  }
+}
+```
+
+### Update Subtask
+
+```http
+PATCH /api/subtasks/[taskId]/[subtaskId]
+```
+
+**Body:**
+```json
+{
+  "status": "in_progress",
+  "metadata": {
+    "priority": "medium"
+  }
+}
+```
+
+---
+
+## Kanban API
+
+### Get Kanban Board
+
+```http
+GET /api/tasks/kanban
+```
+
+**Query Parameters:**
+- `group` - Filter by task group ID
+
+**Response:**
+```json
+{
+  "columns": [
+    {
+      "id": "todo",
+      "title": "To Do",
+      "tasks": [
+        {
+          "id": "task-1",
+          "title": "Implement feature",
+          "status": "todo",
+          "type": "story",
+          "file": "tasks/features.md",
+          "line": 15,
+          "metadata": {
+            "priority": "high",
+            "estimate": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "in_progress",
+      "title": "In Progress",
+      "tasks": [...]
+    },
+    {
+      "id": "done",
+      "title": "Done",
+      "tasks": [...]
+    }
+  ],
+  "totalTasks": 12,
+  "groupName": "All Tasks"
+}
+```
+
+---
+
+## File Operations API
+
+### Watch Files (Server-Sent Events)
+
+```http
+GET /api/files/watch
+```
+
+**Headers:**
+```
+Accept: text/event-stream
+Cache-Control: no-cache
+```
+
+**Event Types:**
+- `connected` - Connection established
+- `file-change` - File modified
+- `file-add` - File added
+- `file-remove` - File deleted
+- `heartbeat` - Keep-alive ping
+
+**Event Format:**
+```
+event: file-change
+data: {"type":"file-change","path":"docs/guide.md","timestamp":1642234567890}
+```
+
+### Structure API
+
+```http
+GET /api/structure
+```
+
+**Response:**
+```json
+{
+  "structure": {
+    "docs": {
+      "type": "directory",
+      "children": {
+        "getting-started.mdx": {
+          "type": "file",
+          "path": "docs/getting-started.mdx",
+          "size": 1024,
+          "lastModified": "2024-01-15T10:30:00Z"
+        },
+        "advanced": {
+          "type": "directory",
+          "children": {...}
+        }
+      }
+    },
+    "tasks": {...}
+  }
+}
+```
+
+---
+
+## Error Responses
+
+All API endpoints return consistent error responses:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid task status",
+    "details": {
+      "field": "status",
+      "received": "invalid",
+      "expected": ["todo", "in_progress", "done"]
+    }
+  }
+}
+```
+
+### HTTP Status Codes
+
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request (validation errors)
+- `404` - Not Found
+- `422` - Unprocessable Entity
+- `500` - Internal Server Error
+
+### Error Codes
+
+- `VALIDATION_ERROR` - Request validation failed
+- `FILE_NOT_FOUND` - Requested file doesn't exist
+- `PARSE_ERROR` - Failed to parse file content
+- `WRITE_ERROR` - Failed to write file
+- `CONFIG_ERROR` - Configuration issue
+
+---
+
+## WebSocket API (Future)
+
+Future versions will include WebSocket support for real-time collaboration:
+
+```javascript
+const ws = new WebSocket('ws://localhost:3000/api/ws');
+
+ws.on('message', (data) => {
+  const event = JSON.parse(data);
+  // Handle real-time updates
+});
+
+// Send cursor position
+ws.send(JSON.stringify({
+  type: 'cursor',
+  position: { line: 10, column: 5 },
+  file: 'docs/guide.md'
+}));
+```
+
+---
+
+## SDK Examples
+
+### JavaScript/Node.js
+
+```javascript
+class GitionAPI {
+  constructor(baseUrl = 'http://localhost:3000/api') {
+    this.baseUrl = baseUrl;
+  }
+
+  async getTasks() {
+    const response = await fetch(`${this.baseUrl}/tasks?view=groups`);
+    return response.json();
+  }
+
+  async updateTaskStatus(taskId, status) {
+    const response = await fetch(`${this.baseUrl}/task-management/${taskId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    return response.json();
+  }
+}
+
+const api = new GitionAPI();
+const tasks = await api.getTasks();
+```
+
+### Python
+
+```python
+import requests
+
+class GitionAPI:
+    def __init__(self, base_url="http://localhost:3000/api"):
+        self.base_url = base_url
+
+    def get_tasks(self):
+        response = requests.get(f"{self.base_url}/tasks?view=groups")
+        return response.json()
+
+    def update_task_status(self, task_id, status):
+        response = requests.patch(
+            f"{self.base_url}/task-management/{task_id}/status",
+            json={"status": status}
+        )
+        return response.json()
+
+api = GitionAPI()
+tasks = api.get_tasks()
+```
+
+### cURL Examples
+
+```bash
+# Get configuration
+curl http://localhost:3000/api/config
+
+# Update task status
+curl -X PATCH http://localhost:3000/api/task-management/my-task/status \
+  -H "Content-Type: application/json" \
+  -d '{"status": "done"}'
+
+# Watch file changes
+curl -N -H "Accept: text/event-stream" \
+  http://localhost:3000/api/files/watch
+```

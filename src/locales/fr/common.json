@@ -7,7 +7,7 @@
   },
   "homepage": {
     "documentation": "Documentation",
-    "documentsFound": "{count, plural, =1 {document} other {documents}} trouvé(s)",
+    "documentsFound": "{count} {count, plural, =1 {document trouvé} other {documents trouvés}}",
     "tasks": "Tâches",
     "completed": "terminées",
     "complete": "terminé",
@@ -56,7 +56,7 @@
   "docs": {
     "title": "Documentation",
     "subtitle": "Parcourez vos fichiers de documentation markdown",
-    "documentsFound": "{count, plural, =1 {document} other {documents}} trouvé(s)",
+    "documentsFound": "{count} {count, plural, =1 {document trouvé} other {documents trouvés}}",
     "noDocuments": "Aucun document trouvé",
     "createFiles": "Créez des fichiers .md ou .mdx dans votre répertoire docs pour commencer",
     "toAddDocumentation": "Pour ajouter de la documentation :",

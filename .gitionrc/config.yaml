@@ -1,0 +1,53 @@
+name: "Gition Development"
+description: "Zero-config local web interface for managing Markdown/MDX documentation and tasks"
+
+# Directory Configuration
+docsDir: "docs"
+tasksDir: "tasks"
+
+# Theme Configuration
+theme:
+  primaryColor: "#3b82f6"
+  darkMode: true
+
+# Feature Configuration
+features:
+  taskManagement: true
+  realTimeUpdates: true
+  search: true
+  darkModeToggle: true
+  languageSelector: true
+
+# Task Types
+taskTypes:
+  - name: "epic"
+    folder: "epics"
+    icon: "target"
+    color: "#8b5cf6"
+  - name: "story"
+    folder: "stories"
+    icon: "book"
+    color: "#3b82f6"
+  - name: "bug"
+    folder: "bugs"
+    icon: "bug"
+    color: "#ef4444"
+  - name: "task"
+    folder: "tasks"
+    icon: "check-circle"
+    color: "#10b981"
+
+# Users
+users:
+  - name: "Romain Frame"
+    email: "romain@example.com"
+    role: "Maintainer"
+
+# Language
+defaultLanguage: "en"
+
+# Development-specific settings
+development:
+  debug: true
+  logLevel: "info"
+  hotReload: true

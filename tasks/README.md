@@ -1,0 +1,125 @@
+# Gition Task Management
+
+This directory contains task management files for Gition development, organized using Gition's own task management system.
+
+## 📋 Current Tasks
+
+### Active Development
+
+- [**Current Priorities**](./current-priorities.md) - Immediate development priorities and sprint planning
+- [**Bug Fixes**](./bug-fixes.md) - Critical bugs and technical issues to resolve
+
+### Roadmaps
+
+- [**v0.2 Roadmap**](./v0.2-roadmap.md) - Next major version planning with advanced features
+- [**Completed Roadmap**](./completed-roadmap.md) - Historical view of completed v0.1 features
+
+## 🎯 Task Categories
+
+### By Priority
+
+- **Critical**: TypeScript fixes, security issues, data integrity
+- **High**: Performance, user experience, testing infrastructure
+- **Medium**: New features, documentation improvements
+- **Low**: Nice-to-have enhancements
+
+### By Type
+
+- **Epic**: Large features or initiatives (v0.2 roadmap items)
+- **Story**: User-facing features and improvements
+- **Bug**: Issues that need fixing
+- **Task**: Development and maintenance work
+
+## 📊 Status Overview
+
+### Completed ✅
+
+- Core framework and CLI tool
+- Real-time task management with Kanban
+- Documentation system with MDX
+- Configuration and internationalization
+- Package publishing and distribution
+
+### In Progress 🚧
+
+- TypeScript error resolution
+- Testing infrastructure setup
+- Performance optimizations
+- Community building
+
+### Planned 🎯
+
+- Advanced MDX features
+- Collaboration tools
+- Performance improvements
+- AI-powered features
+
+## 🔄 Workflow
+
+### Task Lifecycle
+
+1. **Backlog** - Ideas and requests
+2. **Todo** - Prioritized and planned
+3. **In Progress** - Actively being worked on
+4. **Review** - Ready for review/testing
+5. **Done** - Completed and verified
+
+### Sprint Planning
+
+- **Current Sprint**: Focus on critical TypeScript fixes and testing
+- **Next Sprint**: Performance improvements and documentation
+- **Future Sprints**: v0.2 feature development
+
+## 📝 Task Format
+
+Tasks follow this structure:
+
+```markdown
+---
+title: "Task Title"
+type: "epic|story|bug|task"
+status: "todo|in_progress|done"
+priority: "critical|high|medium|low"
+assignee: "team-member"
+due_date: "YYYY-MM-DD"
+tags: ["category", "technology"]
+---
+
+# Task Description
+
+Detailed description with acceptance criteria and technical notes.
+
+## Acceptance Criteria
+
+- [ ] Specific, measurable requirements
+- [ ] User-facing behavior expectations
+- [ ] Technical implementation details
+
+## Technical Notes
+
+Implementation details, dependencies, and considerations.
+```
+
+## 🤝 Contributing
+
+To contribute to task management:
+
+1. **Report Issues**: Create tasks for bugs or feature requests
+2. **Update Progress**: Keep task statuses current
+3. **Add Details**: Improve task descriptions and acceptance criteria
+4. **Review Tasks**: Help prioritize and groom the backlog
+
+## 📈 Metrics
+
+We track:
+
+- **Velocity**: Story points completed per sprint
+- **Burndown**: Progress toward sprint goals
+- **Quality**: Bug rate and resolution time
+- **Scope**: Feature completeness and user satisfaction
+
+## 🔗 Related
+
+- [**Documentation**](../docs/) - User and developer guides
+- [**Contributing Guide**](../docs/contributing.mdx) - How to contribute
+- [**Development Guide**](../docs/development.mdx) - Development setup

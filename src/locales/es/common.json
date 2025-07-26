@@ -7,7 +7,7 @@
   },
   "homepage": {
     "documentation": "Documentación",
-    "documentsFound": "{count, plural, =1 {documento} other {documentos}} encontrado(s)",
+    "documentsFound": "{count} {count, plural, =1 {documento encontrado} other {documentos encontrados}}",
     "tasks": "Tareas",
     "completed": "completadas",
     "complete": "completo",
@@ -56,7 +56,7 @@
   "docs": {
     "title": "Documentación",
     "subtitle": "Explora tus archivos de documentación markdown",
-    "documentsFound": "{count, plural, =1 {documento} other {documentos}} encontrado(s)",
+    "documentsFound": "{count} {count, plural, =1 {documento encontrado} other {documentos encontrados}}",
     "noDocuments": "No se encontraron documentos",
     "createFiles": "Crea algunos archivos .md o .mdx en tu directorio docs para comenzar",
     "toAddDocumentation": "Para añadir documentación:",

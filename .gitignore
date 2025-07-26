@@ -46,6 +46,10 @@ CLAUDE.md
 
 # Project
 .vscode
-TODO.md
 TEST_CASES.md
 *.tgz
+
+# Gition runtime (include config and content in version control)
+.gition/cache/
+.gition/logs/
+.gition/temp/

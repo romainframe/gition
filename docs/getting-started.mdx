@@ -1,0 +1,174 @@
+# Getting Started with Gition
+
+Welcome to Gition! This guide will help you get up and running with your local documentation and task management workspace.
+
+## Installation
+
+Install Gition globally via npm:
+
+```bash
+npm install -g gition-ui
+```
+
+Or use it directly with npx:
+
+```bash
+npx gition-ui
+```
+
+## Quick Start
+
+### 1. Initialize a New Project
+
+Create a new Gition workspace in your current directory:
+
+```bash
+npx gition-ui init
+```
+
+This will create:
+- `.gitionrc/config.yaml` - Configuration file
+- `docs/` - Documentation folder
+- `tasks/` - Task management folder
+- Sample files to get you started
+
+### 2. Serve Your Documentation
+
+Start the development server:
+
+```bash
+# In your project directory
+npx gition-ui
+
+# Or specify a different directory
+npx gition-ui /path/to/your/docs
+
+# Or use a custom port
+npx gition-ui --port 3001
+```
+
+### 3. Access Your Workspace
+
+Open your browser to `http://localhost:3000` to see:
+
+- **Documentation**: Browse and edit your Markdown/MDX files
+- **Tasks**: Manage your project tasks in a Kanban board
+- **Real-time Updates**: Changes are reflected immediately
+
+## Basic Usage
+
+### Documentation
+
+Create `.md` or `.mdx` files in your `docs/` folder:
+
+```markdown
+---
+title: "My Document"
+description: "A sample document"
+tags: ["documentation", "guide"]
+---
+
+# My Document
+
+This is a sample document with **bold text** and [links](https://example.com).
+
+## Features
+
+- Live editing
+- Real-time preview
+- Markdown support
+- MDX components
+```
+
+### Task Management
+
+Create task files in your `tasks/` folder:
+
+```markdown
+---
+title: "Project Setup"
+type: "epic"
+priority: "high"
+---
+
+# Project Setup
+
+## Tasks
+
+- [ ] Set up development environment
+- [~] Configure build system
+- [x] Write documentation
+
+## Notes
+
+This epic covers the initial project setup phase.
+```
+
+### Task Syntax
+
+- `- [ ]` - Todo item
+- `- [x]` - Completed item  
+- `- [~]` - In progress item
+
+### Task Metadata
+
+Add metadata to tasks using frontmatter:
+
+```yaml
+---
+title: "Feature Implementation"
+type: "story"
+priority: "medium"
+assignee: "john.doe"
+due_date: "2024-01-15"
+tags: ["frontend", "ui"]
+estimate: 5
+---
+```
+
+## Configuration
+
+Customize your workspace by editing `.gitionrc/config.yaml`:
+
+```yaml
+name: "My Project"
+description: "Project documentation and tasks"
+docsDir: "docs"
+tasksDir: "tasks"
+
+theme:
+  primaryColor: "#3b82f6"
+  darkMode: true
+
+features:
+  taskManagement: true
+  realTimeUpdates: true
+  search: true
+
+taskTypes:
+  - name: "epic"
+    folder: "epics"
+    icon: "target"
+  - name: "story"
+    folder: "stories"
+    icon: "book"
+
+users:
+  - name: "John Doe"
+    email: "john@example.com"
+
+defaultLanguage: "en"
+```
+
+## Next Steps
+
+- Explore the [User Guide](./user-guide.mdx) for advanced features
+- Learn about [Configuration](./configuration.mdx) options
+- Check out [Best Practices](./best-practices.mdx)
+- See [Examples](./examples.mdx) for common use cases
+
+## Need Help?
+
+- Check the [FAQ](./faq.mdx)
+- Visit our [GitHub Issues](https://github.com/romainframe/gition/issues)
+- Read the [Contributing Guide](./contributing.mdx)

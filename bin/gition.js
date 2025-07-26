@@ -18,7 +18,7 @@ const program = new Command();
 program
   .name("gition")
   .description("Zero-config local web interface for Markdown/MDX files")
-  .version("0.1.3");
+  .version("0.1.4");
 
 // Main serve command
 program

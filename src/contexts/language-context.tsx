@@ -35,11 +35,27 @@ function translate(
     return key;
   }
 
+  // Handle pluralization syntax: {count, plural, =1 {singular} other {plural}}
+  let processedValue = value.replace(
+    /\{(\w+),\s*plural,\s*=1\s*\{([^}]+)\}\s*other\s*\{([^}]+)\}\}/g,
+    (match, paramKey, singular, plural) => {
+      const count = params[paramKey];
+      if (typeof count === "number") {
+        return count === 1 ? singular : plural;
+      }
+      return match;
+    }
+  );
+
   // Simple parameter replacement
-  return value.replace(/\{(\w+)\}/g, (match, paramKey) => {
+  processedValue = processedValue.replace(/\{(\w+)\}/g, (match, paramKey) => {
     const replacement = params[paramKey];
-    return typeof replacement === "string" ? replacement : match;
+    return typeof replacement === "string" || typeof replacement === "number"
+      ? replacement.toString()
+      : match;
   });
+
+  return processedValue;
 }
 
 // Import translations dynamically

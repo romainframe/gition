@@ -22,13 +22,15 @@ export default function DocPage() {
     : params?.slug;
   const {
     docs,
-    doc,
     isLoading: loading,
     error,
     fetchDocs,
-    fetchDoc,
+    getDocBySlug,
   } = useDocsStore();
   const { t } = useLanguage();
+
+  // Get the specific document from the docs array
+  const doc = getDocBySlug(slug || "");
 
   useEffect(() => {
     console.log("📄 DocPage - useEffect triggered");
@@ -46,11 +48,7 @@ export default function DocPage() {
       console.log("📄 No docs loaded, fetching all docs first");
       fetchDocs();
     }
-
-    // Always fetch the specific doc to ensure it's current
-    console.log(`📄 Fetching specific doc: ${slug}`);
-    fetchDoc(slug);
-  }, [slug, docs.length, fetchDocs, fetchDoc]);
+  }, [slug, docs.length, fetchDocs]);
 
   // Handle scroll restoration for navigation
   useEffect(() => {

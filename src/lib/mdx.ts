@@ -77,6 +77,10 @@ export interface TaskGroup {
  * Get the target directory from environment variable or default to current directory
  */
 export function getTargetDirectory(): string {
+  if (process.env.NETLIFY === "true") {
+    return "./";
+  }
+
   if (process.env.GITION_TARGET_DIR) {
     return process.env.GITION_TARGET_DIR;
   }

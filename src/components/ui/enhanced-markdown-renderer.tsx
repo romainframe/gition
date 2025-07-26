@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import ReactMarkdown from "react-markdown";
@@ -221,7 +219,11 @@ const createComponents = (
                   className="mt-1"
                 />
                 <span
-                  className={`text-base leading-7 ${matchingTask.completed ? "line-through text-muted-foreground" : ""}`}
+                  className={`text-base leading-7 ${
+                    matchingTask.completed
+                      ? "line-through text-muted-foreground"
+                      : ""
+                  }`}
                 >
                   {taskText}
                 </span>

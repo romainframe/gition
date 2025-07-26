@@ -55,6 +55,7 @@ TEST_CASES.md
 .gition/logs/
 .gition/temp/
 src/app/docs/\[slug]/page.tsx
+.gition-manifest.json
 
 
 # Playwright

@@ -37,7 +37,6 @@ export default function DocsPage() {
 
   useEffect(() => {
     if (docs.length === 0) {
-      console.log("📚 Fetching docs for docs page");
       fetchDocs();
     }
   }, [docs.length, fetchDocs]);

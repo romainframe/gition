@@ -5,16 +5,48 @@ import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-import { ArrowLeft, Calendar, FileText, Tag, User } from "lucide-react";
-import { marked } from "marked";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { DocumentMetadata } from "@/components/ui/document-metadata";
+import { EnhancedMarkdownRenderer } from "@/components/ui/enhanced-markdown-renderer";
 import { InspectOverlay } from "@/components/dev/inspect-overlay";
 import { useLanguage } from "@/contexts/language-context";
 import { useComponentInspect } from "@/hooks/use-inspect";
 import { useDocsStore } from "@/store/useDocsStore";
+
+// Helper function to remove first H1 line if it exists
+function removeFirstH1(content: string): string {
+  const lines = content.split('\n');
+  
+  // Skip frontmatter if it exists
+  let startIndex = 0;
+  if (lines[0] && lines[0].trim() === '---') {
+    // Find the closing ---
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i] && lines[i].trim() === '---') {
+        startIndex = i + 1;
+        break;
+      }
+    }
+  }
+  
+  // Look for the first H1 after frontmatter
+  for (let i = startIndex; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('# ')) {
+      // Remove this line and return the content
+      return [...lines.slice(0, i), ...lines.slice(i + 1)].join('\n');
+    }
+    // If we encounter non-empty content that's not an H1, stop looking
+    if (line && !line.startsWith('#')) {
+      break;
+    }
+  }
+  
+  return content;
+}
 
 export default function DocPage() {
   const params = useParams();
@@ -45,19 +77,12 @@ export default function DocPage() {
   });
 
   useEffect(() => {
-    console.log("📄 DocPage - useEffect triggered");
-    console.log("📄 Current slug:", slug);
-    console.log("📄 Current doc:", doc?.slug);
-    console.log("📄 Docs length:", docs.length);
-
     if (!slug) {
-      console.log("📄 No slug provided");
       return;
     }
 
     // Fetch all docs if we don't have them
     if (docs.length === 0) {
-      console.log("📄 No docs loaded, fetching all docs first");
       fetchDocs();
     }
   }, [slug, docs.length, fetchDocs, doc?.slug]);
@@ -65,8 +90,6 @@ export default function DocPage() {
   // Handle scroll restoration for navigation
   useEffect(() => {
     if (!slug) return;
-
-    console.log("📄 Setting up scroll handling for:", slug);
 
     // Set scroll restoration to manual to handle it ourselves
     if ("scrollRestoration" in history) {
@@ -103,52 +126,27 @@ export default function DocPage() {
   }, [slug]);
 
   // Process doc data with useMemo - must be called unconditionally
-  const { title, description, tags, date, author, status, processedContent } =
-    useMemo(() => {
-      if (!doc)
-        return {
-          title: "",
-          description: "",
-          tags: [],
-          date: "",
-          author: "",
-          status: "",
-          processedContent: "",
-        };
-
-      const title = doc.metadata.title || doc.slug;
-      const description = doc.metadata.description || doc.excerpt;
-      const tags = doc.metadata.tags || [];
-      const date = doc.metadata.date;
-      const author = doc.metadata.author;
-      const status = doc.metadata.status;
-
-      // Strip first H1 if there's a title in frontmatter to avoid duplication
-      const processedContent = doc.metadata.title
-        ? doc.content.replace(/^#\s+.*$/m, "")
-        : doc.content;
-
+  const { title, description, processedContent } = useMemo(() => {
+    if (!doc)
       return {
-        title,
-        description,
-        tags,
-        date,
-        author,
-        status,
-        processedContent,
+        title: "",
+        description: "",
+        processedContent: "",
       };
-    }, [doc]);
 
-  useEffect(() => {
-    console.log("📄 DocPage rendered with:", {
-      slug,
-      hasDoc: !!doc,
-      docSlug: doc?.slug,
-      loading,
-      error,
+    const title = doc.metadata.title || doc.slug;
+    const description = doc.metadata.description || doc.excerpt;
+
+    // Strip first H1 to avoid duplication with header title
+    const processedContent = removeFirstH1(doc.content);
+
+    return {
       title,
-    });
-  });
+      description,
+      processedContent,
+    };
+  }, [doc]);
+
 
   if (loading) {
     return (
@@ -190,7 +188,7 @@ export default function DocPage() {
     <InspectOverlay componentId="doc-detail-page">
       <div className="flex flex-col h-[calc(100vh-6rem)]">
         {/* Fixed Info Section */}
-        <div className="flex-shrink-0 space-y-6 pb-6 border-b border-border/40">
+        <div className="flex-shrink-0 space-y-6 pb-3 border-b border-border/40">
           {/* Back Navigation */}
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
@@ -215,84 +213,41 @@ export default function DocPage() {
               )}
             </div>
 
-            {/* Metadata */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              {date && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(date).toLocaleDateString()}</span>
-                </div>
-              )}
+            {/* Enhanced Metadata Display */}
+            <DocumentMetadata 
+              metadata={doc.metadata} 
+              filename={doc.filename}
+              showExtended={false}
+            />
 
-              {author && (
-                <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  <span>{author}</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-1">
-                <FileText className="h-4 w-4" />
-                <span>{doc.filename}</span>
-              </div>
-
-              {status && (
-                <Badge
-                  variant={
-                    status === "published"
-                      ? "default"
-                      : status === "draft"
-                        ? "secondary"
-                        : "outline"
-                  }
-                >
-                  {status === "published"
-                    ? t("docs.published")
-                    : status === "draft"
-                      ? t("docs.draft")
-                      : status === "archived"
-                        ? t("docs.archived")
-                        : status}
-                </Badge>
-              )}
-            </div>
-
-            {/* Debug button for testing */}
-            <Button
-              onClick={() => {
-                console.log("🔄 Manual refresh triggered");
-                fetchDocs();
-              }}
-              variant="outline"
-              size="sm"
-            >
-              🔄 Manual Refresh (Debug)
-            </Button>
-
-            {/* Tags */}
-            {tags.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <Tag className="h-4 w-4 text-muted-foreground" />
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+            {/* Metadata Alerts */}
+            {!doc.metadata && (
+              <Alert variant="destructive" className="bg-orange-50 border-orange-200 dark:bg-orange-950 dark:border-orange-800">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  No metadata found. Add frontmatter to this file for better organization.
+                </AlertDescription>
+              </Alert>
             )}
+
+            {doc.metadata && !doc.metadata.title && (
+              <Alert variant="destructive" className="bg-yellow-50 border-yellow-200 dark:bg-yellow-950 dark:border-yellow-800">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  No title found in metadata. Add a &quot;title&quot; field to the frontmatter.
+                </AlertDescription>
+              </Alert>
+            )}
+
           </div>
         </div>
 
         {/* Scrollable Content Section */}
-        <div className="flex-1 overflow-auto no-scrollbar pt-6">
-          <Card className="border-none shadow-none bg-transparent">
-            <CardContent className="p-0">
-              <div
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: marked(processedContent) }}
-              />
-            </CardContent>
-          </Card>
+        <div className="flex-1 overflow-auto no-scrollbar pt-3">
+          <EnhancedMarkdownRenderer 
+            content={processedContent}
+            className="max-w-none"
+          />
         </div>
       </div>
     </InspectOverlay>

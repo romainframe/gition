@@ -85,18 +85,18 @@ interface FileProcessingPipeline {
 
 ```mermaid
 graph TB
-    A[Raw File Content] --> B[Split at '---']
-    B --> C[YAML Section]
-    B --> D[Markdown Content]
+    A["Raw File Content"] --> B["Split at '---'"]
+    B --> C["YAML Section"]
+    B --> D["Markdown Content"]
 
-    C --> E[yaml.parse()]
-    E --> F[Frontmatter Object]
+    C --> E["yaml.parse()"]
+    E --> F["Frontmatter Object"]
 
-    D --> G[Content String]
+    D --> G["Content String"]
 
-    F --> H[Document Metadata]
-    G --> I[Task Extraction]
-    G --> J[MDX Processing]
+    F --> H["Document Metadata"]
+    G --> I["Task Extraction"]
+    G --> J["MDX Processing"]
 ```
 
 **Code Flow:**
@@ -236,7 +236,7 @@ interface DebouncingConfig {
 
 ```mermaid
 graph TB
-    A[File Changes] --> B[extractTasks()]
+    A["File Changes"] --> B["extractTasks()"]
     B --> C[Task Objects Array]
 
     C --> D[Group by File]

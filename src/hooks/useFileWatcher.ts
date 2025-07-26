@@ -133,7 +133,7 @@ export function useFileWatcher() {
     } catch (error) {
       console.error("Failed to establish file watcher connection:", error);
     }
-  }, [debouncedRefresh]);
+  }, [debouncedRefresh, refreshDocs, refreshStructure]);
 
   useEffect(() => {
     // Only connect in development mode and on client side

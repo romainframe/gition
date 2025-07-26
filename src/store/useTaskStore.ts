@@ -31,6 +31,7 @@ export interface TaskGroup {
   totalTasks: number;
   completedTasks: number;
   pendingTasks: number;
+  content?: string;
   metadata?: {
     title?: string;
     description?: string;

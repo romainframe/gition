@@ -51,6 +51,7 @@ export interface TaskGroup {
   totalTasks: number;
   completedTasks: number;
   pendingTasks: number;
+  content?: string;
   metadata?: {
     title?: string;
     description?: string;
@@ -81,12 +82,6 @@ export function getTargetDirectory(): string {
   }
 
   const cwd = process.cwd();
-
-  // Check if examples/first directory exists and use it as default
-  const examplesFirstPath = path.join(cwd, "examples", "first");
-  if (fs.existsSync(examplesFirstPath)) {
-    return examplesFirstPath;
-  }
 
   return cwd;
 }
@@ -409,6 +404,7 @@ export function getTaskGroups(): TaskGroup[] {
         totalTasks: 0,
         completedTasks: 0,
         pendingTasks: 0,
+        content: fileData ? fileData.content : undefined,
         metadata,
       });
     }

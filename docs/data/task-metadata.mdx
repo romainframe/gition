@@ -50,12 +50,43 @@ priority: "high"
 assignee: "backend-team"
 due: "2024-02-15"
 tags: ["authentication", "security"]
+completedDate: "2024-02-20"
+valueScore: 85
+estimateScore: 60
+parent: "ref:epics/platform-foundation"
+version: "v1.0"
 ---
 
 # User Authentication Epic
 
 Your task content here...
 ```
+
+#### Supported Task Metadata Fields
+
+| Field           | Type                                        | Description                       | Example                                 |
+| --------------- | ------------------------------------------- | --------------------------------- | --------------------------------------- |
+| `title`         | `string`                                    | Task title                        | `"User Authentication Epic"`            |
+| `description`   | `string`                                    | Task description                  | `"Complete user authentication system"` |
+| `type`          | `"epic" \| "story" \| "doc"`                | Task type (from folder structure) | `"epic"`                                |
+| `priority`      | `"low" \| "medium" \| "high" \| "critical"` | Task priority level               | `"high"`                                |
+| `assignee`      | `string`                                    | Person or team assigned           | `"backend-team"`                        |
+| `due`           | `string`                                    | Due date (YYYY-MM-DD)             | `"2024-02-15"`                          |
+| `tags`          | `string[]`                                  | Task tags                         | `["authentication", "security"]`        |
+| `completedDate` | `string`                                    | Completion date (YYYY-MM-DD)      | `"2024-02-20"`                          |
+| `valueScore`    | `number`                                    | Business/user value score (1-100) | `85`                                    |
+| `estimateScore` | `number`                                    | Effort/complexity score (1-100)   | `60`                                    |
+| `parent`        | `string`                                    | Reference to parent task          | `"ref:epics/parent-epic"`               |
+| `version`       | `string`                                    | Version string for iterations     | `"v1.0"`                                |
+
+#### New Metadata Fields Rationale
+
+**Enhanced Task Frontmatter:**
+
+- **`completedDate`**: Enables historical tracking and reporting of task completion for project analytics
+- **`valueScore` & `estimateScore`**: Facilitate robust prioritization frameworks like Value vs. Effort matrices for strategic task sorting
+- **`parent`**: Explicitly defines hierarchical relationships between tasks (e.g., Epic → Story) using the existing `ref:` pattern
+- **`version`**: Provides mechanism to track iterations or major updates to a task's scope or requirements
 
 ## Subtask Syntax (Within Task Files)
 
@@ -69,10 +100,10 @@ Subtasks use standard markdown checkbox syntax within task files:
 
 ## Subtask States
 
-| Syntax | State | Description |
-|--------|-------|-------------|
-| `- [ ]` | `todo` | Subtask not started |
-| `- [x]` | `done` | Subtask completed |
+| Syntax  | State         | Description                    |
+| ------- | ------------- | ------------------------------ |
+| `- [ ]` | `todo`        | Subtask not started            |
+| `- [x]` | `done`        | Subtask completed              |
 | `- [~]` | `in_progress` | Subtask in progress (optional) |
 
 ## Subtask Inline Metadata
@@ -81,18 +112,33 @@ Subtasks can include inline metadata using JSON-like syntax at the end of the li
 
 ```markdown
 - [ ] Subtask title {key: value, key2: "string value"}
+- [ ] Implement user login {priority: "high", assignee: "john", due: "2024-02-01", estimate: 4, startDate: "2024-01-20", timeSpent: 2.5}
+- [x] Setup database schema {sourceLink: "https://github.com/org/repo/pull/123", ref: "epics/user-management"}
 ```
 
 ### Supported Subtask Metadata Fields
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `priority` | `"low" \| "medium" \| "high"` | Subtask priority | `{priority: "high"}` |
-| `assignee` | `string` | Person assigned to subtask | `{assignee: "john"}` |
-| `due` | `string` | Due date (YYYY-MM-DD) | `{due: "2024-02-01"}` |
-| `tags` | `string[]` | Subtask tags | `{tags: ["frontend", "ui"]}` |
-| `estimate` | `number` | Time estimate in hours | `{estimate: 4}` |
-| `status` | `"blocked" \| "waiting" \| "review"` | Additional status | `{status: "blocked"}` |
+| Field        | Type                                 | Description                       | Example                             |
+| ------------ | ------------------------------------ | --------------------------------- | ----------------------------------- |
+| `priority`   | `"low" \| "medium" \| "high"`        | Subtask priority                  | `{priority: "high"}`                |
+| `assignee`   | `string`                             | Person assigned to subtask        | `{assignee: "john"}`                |
+| `due`        | `string`                             | Due date (YYYY-MM-DD)             | `{due: "2024-02-01"}`               |
+| `tags`       | `string[]`                           | Subtask tags                      | `{tags: ["frontend", "ui"]}`        |
+| `estimate`   | `number`                             | Time estimate in hours            | `{estimate: 4}`                     |
+| `status`     | `"blocked" \| "waiting" \| "review"` | Additional status                 | `{status: "blocked"}`               |
+| `startDate`  | `string`                             | Date when work began (YYYY-MM-DD) | `{startDate: "2024-01-20"}`         |
+| `timeSpent`  | `number`                             | Actual time spent in hours        | `{timeSpent: 2.5}`                  |
+| `sourceLink` | `string`                             | URL to external resource          | `{sourceLink: "https://github..."}` |
+| `ref`        | `string`                             | Reference to another task file    | `{ref: "epics/user-management"}`    |
+
+#### New Subtask Metadata Fields Rationale
+
+**Enhanced Subtask Tracking:**
+
+- **`startDate`**: Provides clearer picture of when work actively commenced, improving progress tracking
+- **`timeSpent`**: Allows granular actual effort tracking against subtasks, complementing the `estimate` field for future estimation accuracy
+- **`sourceLink`**: Direct linking to external resources provides immediate context for developers and enhances traceability of work to its origin
+- **`ref`**: References to other task files create explicit connections and dependencies between tasks
 
 ## Subtask References
 
@@ -106,12 +152,12 @@ Subtasks can reference other task files or documents using the `ref:` syntax:
 
 ### Reference Patterns
 
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| `ref:epics/task-name` | Reference to epic | `ref:epics/user-management` |
-| `ref:stories/task-name` | Reference to story | `ref:stories/login-form` |
-| `ref:docs/doc-name` | Reference to document | `ref:docs/api-guide` |
-| `ref:folder/file-name` | Reference to any file | `ref:specs/database-schema` |
+| Pattern                 | Description           | Example                     |
+| ----------------------- | --------------------- | --------------------------- |
+| `ref:epics/task-name`   | Reference to epic     | `ref:epics/user-management` |
+| `ref:stories/task-name` | Reference to story    | `ref:stories/login-form`    |
+| `ref:docs/doc-name`     | Reference to document | `ref:docs/api-guide`        |
+| `ref:folder/file-name`  | Reference to any file | `ref:specs/database-schema` |
 
 ## Organization Hierarchy
 
@@ -188,6 +234,11 @@ priority: "high"
 assignee: "backend-team"
 due: "2024-02-15"
 tags: ["authentication", "security", "backend"]
+completedDate: null
+valueScore: 85
+estimateScore: 60
+parent: "ref:epics/platform-foundation"
+version: "v1.0"
 ---
 
 # User Authentication Epic
@@ -196,30 +247,31 @@ Implement a complete user authentication system.
 
 ## Core Requirements (Subtasks)
 
-- [ ] OAuth 2.0 integration {priority: "high", assignee: "backend-team", due: "2024-02-15"}
-- [ ] JWT token management {priority: "high", due: "2024-02-10"}
-- [ ] Password reset functionality {priority: "medium", assignee: "fullstack"}
+- [ ] OAuth 2.0 integration {priority: "high", assignee: "backend-team", due: "2024-02-15", estimate: 16, startDate: "2024-01-15"}
+- [ ] JWT token management {priority: "high", due: "2024-02-10", estimate: 8}
+- [x] Password reset functionality {priority: "medium", assignee: "fullstack", timeSpent: 12, sourceLink: "https://github.com/org/repo/pull/45"}
 
 ## Related Stories (Subtask References)
 
-- [ ] Login form UI ref:stories/login-form
-- [ ] Registration flow ref:stories/user-registration
-- [ ] Password reset UI ref:stories/password-reset
+- [ ] Login form UI {ref: "stories/login-form", priority: "high"}
+- [ ] Registration flow {ref: "stories/user-registration", priority: "medium"}
+- [ ] Password reset UI {ref: "stories/password-reset", assignee: "frontend"}
 
 ## Technical Subtasks
 
-- [x] Set up authentication database schema
-- [ ] Implement middleware for protected routes {assignee: "backend"}
-- [ ] Add rate limiting for auth endpoints {priority: "medium"}
-- [ ] Write authentication tests {tags: ["testing"], estimate: 8}
+- [x] Set up authentication database schema {timeSpent: 6, sourceLink: "https://docs.example.com/db-schema"}
+- [ ] Implement middleware for protected routes {assignee: "backend", estimate: 4}
+- [ ] Add rate limiting for auth endpoints {priority: "medium", estimate: 3}
+- [ ] Write authentication tests {tags: ["testing"], estimate: 8, assignee: "qa-team"}
 
 ## Documentation Subtasks
 
-- [ ] Update API documentation ref:docs/api-authentication
-- [ ] Create user guide for login process
+- [ ] Update API documentation {ref: "docs/api-authentication", assignee: "tech-writer", estimate: 2}
+- [ ] Create user guide for login process {priority: "low", estimate: 3}
 ```
 
 **Key points:**
+
 - The **task** is the file itself (`user-authentication.mdx`)
 - **Subtasks** are the checkbox items within the file
 - Task metadata goes in frontmatter
@@ -228,12 +280,18 @@ Implement a complete user authentication system.
 ## Best Practices
 
 ### For Task Files
+
 1. **Use descriptive file names** and titles that clearly explain the feature/goal
 2. **Add comprehensive frontmatter** with type, priority, assignee, and due dates
 3. **Organize in logical folders** (epics/, stories/, docs/)
 4. **Include clear descriptions** in frontmatter and content
+5. **Set value and estimate scores** for strategic prioritization and planning
+6. **Define parent relationships** to create clear task hierarchies
+7. **Use version strings** to track major iterations of evolving features
+8. **Update completion dates** for historical tracking and reporting
 
 ### For Subtasks
+
 1. **Write specific, actionable subtasks** that can be completed independently
 2. **Add inline metadata** for important subtasks (priority, assignee, due dates)
 3. **Use subtask references** to create connections between files
@@ -241,8 +299,13 @@ Implement a complete user authentication system.
 5. **Update subtask status** regularly to reflect current progress
 6. **Include estimates** for planning purposes
 7. **Tag subtasks** for easy filtering and organization
+8. **Track start dates** to monitor active work periods
+9. **Record time spent** to improve future estimation accuracy
+10. **Add source links** to external resources for context and traceability
+11. **Use ref metadata** to explicitly link related tasks and dependencies
 
 ### General
+
 1. **Maintain clear distinction** between task files and their contained subtasks
 2. **Use consistent naming** and folder structures across your project
 3. **Keep task files focused** on a single epic, story, or documentation area

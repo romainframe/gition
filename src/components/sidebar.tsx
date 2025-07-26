@@ -217,7 +217,6 @@ export function Sidebar() {
 
   useEffect(() => {
     if (!structure) {
-      console.log("📁 Fetching structure for sidebar");
       fetchStructure();
     }
   }, [structure, fetchStructure]);

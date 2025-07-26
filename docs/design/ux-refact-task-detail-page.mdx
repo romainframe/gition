@@ -1,0 +1,435 @@
+# Gition Task Detail Page UI/UX Specification
+
+## Introduction
+
+This document defines the user experience goals, information architecture, user flows, and visual design specifications for Gition's **Task Detail Page** user interface. It serves as the foundation for visual design and frontend development, ensuring a cohesive and user-centered experience.
+
+### Overall UX Goals & Principles
+
+#### Target User Personas
+
+**Gition Maintainer:** A developer who wants a zero-config local web interface for Markdown documentation and task management. They prioritize efficiency in managing their local files, and need quick access to task details for editing and updates.
+
+#### Usability Goals
+
+- Ease of learning: New users can complete core tasks within 5 minutes
+- Efficiency: Users should be able to quickly find and act on the most important information related to a task with minimal clicks.
+- Clarity: The layout should clearly distinguish between different types of information (e.g., task status, description, subtasks, comments) and present them in an easily digestible format.
+- Consistency: The design should align with existing Gition UI patterns while incorporating best practices from leading task management tools.
+- Intuitiveness: New users should be able to understand how to interact with the Task Detail page without extensive training.
+
+#### Design Principles
+
+1. **Prioritize Core Information:** Ensure the most critical task details (status, title, assignee, due date, description) are immediately visible and prominent, making them **clear, compact, and easy to read** for **eye time effective** scanning.
+2. **Contextual Relevance:** Display related information (subtasks, comments, attachments) in a way that is easily accessible but doesn't overwhelm the primary view, promoting a **simple** and **compact** presentation.
+3. **Action-Oriented Design:** Make common actions (e.g., changing status, editing description, adding comments) discoverable and easy to perform.
+4. **Visual Hierarchy:** Use size, color, and spacing effectively to guide the user's eye and highlight important elements, contributing to an **easy to read** and **eye time effective** interface.
+5. **Adaptability:** The design should be flexible enough to accommodate different types of tasks and future enhancements (e.g., custom fields).
+
+### Information Architecture (IA)
+
+#### Site Map / Screen Inventory
+
+```mermaid
+graph TD
+    A[Task Detail Page] --> B[Header (Task Title & Key Actions)]
+    A --> C[Core Details (Status, Priority, Assignee, Due Date, Value Score, Estimate Score)]
+    A --> D[Description]
+    A --> E[Subtasks/Checklist]
+    A --> F[Comments/Activity Log]
+    A --> G[Attachments]
+    A --> H[Related Items (e.g., Parent Epic, Linked Documents, External Links)]
+```
+
+#### Navigation Structure
+
+**Primary Navigation:** The main Gition navigation will allow users to switch between "Documentation" and "Tasks" (Kanban board).
+
+**Secondary Navigation (within Tasks):** Users will navigate from the Kanban board or a task list to the Task Detail Page.
+
+**Task Detail Page Navigation:**
+
+- **Back Button:** A clear "Back to Tasks" or "Return to Kanban" button to easily return to the overview.
+- **Internal Sections:** Within the Task Detail Page, key sections like "Description," "Subtasks," "Comments," "Attachments," and "Related Items" will be clearly demarcated. These could potentially be tabbed or collapsible sections to maintain compactness.
+- **External Links:** `ref:` and `sourceLink` metadata will provide direct links to other tasks, documents, or external resources.
+
+**Relationship to Kanban View:** The Task Detail Page will likely function as a modal or a side panel overlaying the Kanban board for quick, in-context viewing and editing, mimicking best-in-class tools like Trello or Jira's quick edit. This allows users to stay within the flow of the Kanban while accessing detailed information.
+
+**Breadcrumb Strategy:** Simple breadcrumbs could indicate `Tasks > [Current Task Title]` if navigating as a full page. If a modal, the context of the Kanban board is inherently maintained.
+
+### User Flows
+
+#### Viewing Task Details
+
+**User Goal:** The user wants to quickly understand the current status, key information, and overall context of a specific task.
+
+**Entry Points:** Clicking on a task from the Kanban board or a task list.
+
+**Success Criteria:** The user can find all critical information at a glance, and understand the task's current state and relevant details without needing to navigate away or dig deep.
+
+#### Flow Diagram
+
+```mermaid
+graph TD
+    A[User Clicks on Task] --> B{Task Detail Page Loads (Modal/Panel)}
+    B --> C[Display Task Title]
+    B --> D[Display Status, Priority, Assignee, Due Date, Value Score, Estimate Score]
+    B --> E[Display Description]
+    B --> F[Display Subtasks/Checklist]
+    B --> G[Display Comments/Activity Log]
+    B --> H[Display Attachments]
+    B --> I[Display Related Items (e.g., Parent Epic, Linked Docs, External Links)]
+    C & D & E & F & G & H & I --> J[User comprehends task details]
+```
+
+**Edge Cases & Error Handling:**
+
+- Task Not Found: Display a clear "Task Not Found" message and allow easy return to the main task view.
+- Loading States: Show clear loading indicators while task details are being fetched.
+
+**Notes:** Emphasize rapid display of critical information and smart use of space to avoid clutter. Information should be scannable.
+
+#### Updating Task Status
+
+**User Goal:** The user wants to quickly and easily change the overall status of a task or the completion status of its subtasks, reflecting current progress.
+
+**Entry Points:** The Task Detail page, where task and subtask status indicators are visible.
+
+**Success Criteria:** The user can update a task or subtask status with minimal clicks, and the UI immediately reflects the change.
+
+#### Flow Diagram
+
+```mermaid
+graph TD
+    A[User on Task Detail Page] --> B{Wants to change main Task Status?}
+    B -- Yes --> C[Click Task Status Indicator (e.g., Status Badge/Dropdown)]
+    C --> D[Select New Status (e.g., Todo, In Progress, Done, Blocked, Waiting, Review)]
+    D --> E[System Updates Task Status]
+    E --> F[UI Reflects New Status & Updates Kanban/List View]
+
+    B -- No --> G{Wants to change Subtask Status?}
+    G -- Yes --> H[Locate Subtask Checkbox]
+    H --> I[Click Subtask Checkbox]
+    I --> J{Subtask State Toggles}
+    J --> J1[From [ ] Todo to [~] In Progress (if applicable)]
+    J --> J2[From [~] In Progress to [x] Done]
+    J --> J3[From [x] Done to [ ] Todo (reopen)]
+    J3 --> K[System Updates Subtask Status]
+    K --> L[UI Reflects New Subtask Status]
+    L --> M[Update Task Progress Bar/Summary (if applicable)]
+
+    F & M --> N[User Confirms Status Update]
+```
+
+**Edge Cases & Error Handling:**
+
+- Invalid Status Change: Provide feedback if a status change is not allowed (e.g., trying to move a blocked task to "Done" without unblocking).
+- Concurrent Edits: Handle potential conflicts if multiple users (or agents) try to update the same task simultaneously (future consideration).
+- Save Errors: Display clear messages if the update fails to save.
+
+**Notes:** Emphasis on single-click interaction for common status changes. Visual feedback on status updates is crucial.
+
+### Wireframes & Mockups
+
+This section clarifies how visual designs are managed and, if necessary, provides conceptual layouts for key screens.
+
+#### Primary Design Files
+
+**Primary Design Files:** External design tool (e.g., Figma, Penpot, Excalidraw)
+
+#### Key Screen Layouts
+
+##### Task Detail Page (Modal/Panel View)
+
+**Purpose:** To provide a comprehensive yet compact view for task management.
+
+**Key Elements:**
+
+- **Top Bar:** Task Title, "Back to Kanban" button, Edit/Share/More Options.
+- **Core Info Section (Compact):** Status badge, Priority badge, Assignee avatar/name, Due Date (possibly with a small calendar icon), Value Score, Estimate Score. Arranged horizontally or in a concise two-column layout.
+- **Description Section:** Markdown rendered description, with an "Edit" button for inline editing or opening a rich text editor.
+- **Subtasks/Checklist Section:** Collapsible or tabbed section, clearly displaying checkboxes and inline metadata. A "Add Subtask" input at the bottom.
+- **Activity/Comments Section:** Stream of comments and system activity (e.g., "Status changed to Done by User X"). Input field for new comments.
+- **Attachments Section:** Collapsible, with file names and possibly small icons. "Add Attachment" button.
+- **Related Items Section:** Collapsible, listing internal Gition `ref:` links and external `sourceLink`s.
+
+**Interaction Notes:**
+
+- All sections should be editable directly or via clear edit icons.
+- Status changes should be quick dropdowns or toggleable badges.
+- Responsive design to adapt from modal/panel to full page on smaller screens.
+
+##### Task Detail Page (Full Page View - for deeper dive/mobile)
+
+**Purpose:** Provides a dedicated page for tasks, especially on mobile or for more focused work.
+
+**Key Elements:** Similar to the modal, but potentially with more vertical spacing and less horizontal constraint.
+
+**Interaction Notes:**
+
+- Clear header with task title and primary actions.
+- Sticky action bar on scroll for common actions.
+
+### Component Library / Design System
+
+This section outlines the approach to establishing or leveraging a component library and design system for Gition, ensuring UI consistency and efficient development.
+
+#### Design System Approach
+
+**Approach:** Leverage **Shadcn UI** for a component library, with **Tailwind CSS** for styling. This approach combines pre-built, accessible components with a utility-first CSS framework for rapid and consistent styling.
+
+#### Core Components
+
+##### Buttons
+
+**Purpose:** For primary and secondary actions (e.g., "Edit," "Save," "Close," "Add Comment").
+
+**Variants:** Primary, Secondary, Ghost, Destructive, Link.
+
+**States:** Default, Hover, Focus, Active, Disabled, Loading.
+
+**Usage Guidelines:** Use Shadcn's Button component, customize with Tailwind for Gition's aesthetic. Ensure clear hierarchy of actions.
+
+##### Form Inputs (Textarea, Input)
+
+**Purpose:** For editing task title, description, adding comments, and metadata fields.
+
+**Variants:** Default, Error, Disabled.
+
+**States:** Default, Focus, Error, Disabled.
+
+**Usage Guidelines:** Utilize Shadcn's Input and Textarea components. Apply Tailwind for sizing, spacing, and validation feedback. Ensure clear labels and placeholder text.
+
+##### Dropdowns/Selects
+
+**Purpose:** For changing task status, priority, assignee, or selecting related items.
+
+**Variants:** Default.
+
+**States:** Open, Closed, Disabled.
+
+**Usage Guidelines:** Use Shadcn's Select or Dropdown Menu for consistent interaction patterns.
+
+##### Badges/Tags
+
+**Purpose:** For compactly displaying task status, priority, and tags.
+
+**Variants:** Status-specific colors (e.g., green for Done, yellow for In Progress, red for Blocked), Priority indicators (e.g., P1, P2), generic tags.
+
+**States:** Default.
+
+**Usage Guidelines:** Create custom badges using Tailwind CSS classes for color and padding. Ensure high contrast for readability.
+
+##### Dialogs/Modals
+
+**Purpose:** For displaying the Task Detail Page itself (if chosen as an overlay), or for confirmation prompts (e.g., "Delete Task").
+
+**Variants:** Small, Medium, Large; Alert, Confirmation.
+
+**States:** Open, Closed.
+
+**Usage Guidelines:** Use Shadcn's Dialog component. Ensure proper focus management and accessibility.
+
+##### Accordions/Collapsible Sections
+
+**Purpose:** For managing the display of optional content like attachments, lengthy activity logs, or extensive comments to maintain compactness.
+
+**Variants:** Default.
+
+**States:** Collapsed, Expanded.
+
+**Usage Guidelines:** Use Shadcn's Accordion (or a custom collapsible component) to allow users to show/hide detailed sections.
+
+##### Checkboxes
+
+**Purpose:** For subtask completion.
+
+**Variants:** Default.
+
+**States:** Unchecked, Checked, Indeterminate, Disabled.
+
+**Usage Guidelines:** Use Shadcn's Checkbox component. Ensure it's visually clear and responsive to user interaction.
+
+### Branding & Style Guide
+
+This section defines the visual identity and styling guidelines for Gition's UI, ensuring consistency and adherence to brand principles, leveraging Tailwind CSS utilities.
+
+#### Visual Identity
+
+**Brand Guidelines:** Gition will adopt a clean, minimalist, and professional aesthetic, prioritizing readability and efficient information display. Dark mode will be a primary consideration.
+
+#### Color Palette
+
+| Color Type           | Hex Code (Light Mode) | Hex Code (Dark Mode) | Usage                                       |
+| -------------------- | --------------------- | -------------------- | ------------------------------------------- |
+| Primary              | \#3b82f6              | \#60a5fa             | Main interactive elements, branding accents |
+| Secondary            | \#6b7280              | \#9ca3af             | Secondary actions, subtle UI elements       |
+| Accent               | \#ec4899              | \#f472b6             | Highlights, important notifications         |
+| Success              | \#22c55e              | \#4ade80             | Positive feedback, confirmations            |
+| Warning              | \#facc15              | \#fde047             | Cautions, important notices                 |
+| Error                | \#ef4444              | \#f87171             | Errors, destructive actions                 |
+| Neutral (Text)       | \#1f2937              | \#f3f4f6             | Primary text color                          |
+| Neutral (Background) | \#ffffff              | \#1f2937             | Page backgrounds, card backgrounds          |
+
+#### Typography
+
+##### Font Families
+
+- **Primary:** Inter (or similar clean sans-serif system font for readability)
+- **Monospace:** JetBrains Mono / Fira Code (or similar for code blocks and technical notes)
+
+##### Type Scale
+
+| Element            | Size (px) | Weight    | Line Height | Tailwind Class Example |
+| ------------------ | --------- | --------- | ----------- | ---------------------- |
+| H1 (Task Title)    | 28-32     | Bold      | 1.2         | text-3xl font-bold     |
+| H2 (Section Title) | 20-24     | Semi-bold | 1.3         | text-xl font-semibold  |
+| Body               | 16        | Normal    | 1.5         | text-base              |
+| Small              | 14        | Normal    | 1.4         | text-sm                |
+| Metadata           | 12        | Normal    | 1.4         | text-xs uppercase      |
+
+#### Iconography
+
+**Icon Library:** Lucide Icons (integrates well with Shadcn UI, modern, flexible)
+
+**Usage Guidelines:**
+
+- Use icons sparingly to enhance meaning, not to replace text.
+- Ensure icons are recognizable and consistent in style.
+- Provide clear labels or tooltips for all interactive icons.
+- Icons should scale appropriately with text size.
+
+#### Spacing & Layout
+
+**Grid System:** Utilize a flexible, responsive grid system (Tailwind's default grid and flexbox utilities). Focus on content alignment and consistent gutters.
+
+**Spacing Scale:** Leverage Tailwind CSS's default spacing scale (e.g., `space-x-`, `p-`, `m-`). Prioritize consistent vertical rhythm and adequate breathing room around elements to maintain compactness without feeling cramped. Default to smaller spacing units to achieve a "compact" feel.
+
+### Accessibility Requirements
+
+This section defines specific accessibility requirements based on target compliance level and user needs. Be comprehensive but practical.
+
+#### Compliance Target
+
+**Standard:** WCAG 2.1 AA (A common, achievable standard for broad accessibility).
+
+#### Key Requirements
+
+**Visual:**
+
+- Color contrast ratios: Ensure all text and interactive elements meet WCAG 2.1 AA contrast ratios (at least 4.5:1 for normal text, 3:1 for large text).
+- Focus indicators: Provide clear, visible focus indicators for all interactive elements (buttons, links, form fields) for keyboard navigation.
+- Text sizing: Users must be able to resize text up to 200% without loss of content or functionality.
+
+**Interaction:**
+
+- Keyboard navigation: All interactive elements must be reachable and operable via keyboard alone, following a logical tab order.
+- Screen reader support: Implement proper ARIA attributes and semantic HTML to ensure meaningful experience for screen reader users. Labels, roles, and states must be conveyed accurately.
+- Touch targets: Ensure interactive elements have a minimum touch target size of 44x44 CSS pixels for touch devices.
+
+**Content:**
+
+- Alternative text: All non-text content (images, icons conveying meaning) must have appropriate `alt` text.
+- Heading structure: Use a logical and hierarchical heading structure (`<h1>` to `<h6>`) for clear document outline.
+- Form labels: All form inputs must have associated, programmatically determinable labels.
+
+#### Testing Strategy
+
+**Accessibility Testing:** Conduct automated accessibility checks (e.g., Lighthouse, Axe DevTools) during development. Perform manual keyboard navigation and screen reader testing (e.g., VoiceOver, NVDA) for critical user flows.
+
+### Responsiveness Strategy
+
+This section defines breakpoints and adaptation strategies for different device sizes. Consider both technical constraints and user contexts.
+
+#### Breakpoints
+
+| Breakpoint | Min Width | Max Width | Target Devices                                |
+| ---------- | --------- | --------- | --------------------------------------------- |
+| Mobile     | 0px       | 639px     | Smartphones (Portrait & Landscape)            |
+| Tablet     | 640px     | 1023px    | Tablets (Portrait & Landscape), Small Laptops |
+| Desktop    | 1024px    | 1279px    | Standard Desktop Monitors                     |
+| Wide       | 1280px    | -         | Large Desktop Monitors, Ultrawide Displays    |
+
+#### Adaptation Patterns
+
+**Layout Changes:**
+
+- **Mobile:** Task details will likely stack vertically, with secondary sections (comments, attachments) potentially hidden behind accordions or tabs for compactness.
+- **Tablet:** A two-column layout might be introduced, or key sections could remain stacked but with more horizontal space.
+- **Desktop/Wide:** A multi-column layout with primary details on one side and supporting information (comments, subtasks) on the other.
+
+**Navigation Changes:**
+
+- **Mobile:** Primary navigation may collapse into a hamburger menu. Task Detail page might become a full-screen view rather than a modal/side panel.
+- **Desktop:** Clear sidebars or top-level navigation elements for switching between tasks/docs and the Task Detail view.
+
+**Content Priority:**
+
+- **Mobile First:** Ensure critical task data (title, status, assignee, due date, description) is always prioritized and easily scannable on smaller screens.
+- **Progressive Enhancement:** Gradually reveal more information and layout complexity as screen real estate increases.
+
+**Interaction Changes:**
+
+- **Touch vs. Click:** Ensure large enough touch targets for mobile. Desktop interactions will primarily use mouse/keyboard.
+- **Hover States:** Utilize hover states on desktop for discoverability of actions, but ensure alternatives for touch devices.
+
+### Animation & Micro-interactions
+
+This section defines motion design principles and key interactions. Keep performance and accessibility in mind.
+
+#### Motion Principles
+
+- **Purposeful:** Animations should serve a clear purpose (e.g., provide feedback, guide attention, indicate state change), not just for decoration.
+- **Subtle & Fast:** Prioritize subtle, quick animations that enhance the experience without delaying user interaction or causing distraction.
+- **Consistent:** Apply similar animation styles for similar interactions across the application.
+- **Performant:** Ensure animations run smoothly at 60fps on target devices, avoiding jank.
+
+#### Key Animations
+
+- **Task Status Change:** Subtle transition (e.g., color fade, quick checkmark animation) when status is updated. (Duration: 150ms, Easing: ease-in-out)
+- **Subtask Completion:** Checkbox animation and subtle strikethrough/fade on text upon completion. (Duration: 100ms, Easing: ease-out)
+- **Collapsible Section Toggle:** Smooth expand/collapse animation for sections like "Subtasks" or "Comments." (Duration: 200ms, Easing: ease-in-out)
+- **Modal/Panel Open/Close:** Fade and scale/slide animation for the Task Detail modal/side panel. (Duration: 300ms, Easing: ease-out)
+- **Form Field Validation:** Gentle shake or border highlight for invalid input. (Duration: 250ms, Easing: ease-out)
+
+### Performance Considerations
+
+This section defines performance goals and strategies that impact UX design decisions.
+
+#### Performance Goals
+
+- **Page Load:** Initial Task Detail page content (excluding comments/attachments if lazy loaded) should load within 1.5 seconds on a fast 3G network.
+- **Interaction Response:** User interactions (e.g., clicking a button, updating status) should result in visual feedback within 100ms.
+- **Animation FPS:** All animations should run at a consistent 60 frames per second (FPS).
+
+#### Design Strategies
+
+- **Lazy Loading:** Implement lazy loading for less critical content (e.g., extensive comment history, large attachments) to prioritize core task details.
+- **Optimized Assets:** Ensure all images, icons, and other media are optimized for web (e.g., compressed, responsive image formats).
+- **Efficient CSS:** Leverage Tailwind CSS's JIT mode and purge unused styles to keep CSS bundle size minimal.
+- **Minimal DOM Complexity:** Design with efficient HTML structure to reduce rendering time.
+- **Client-Side Rendering Optimization:** Optimize data fetching and state updates to minimize re-renders.
+
+### Next Steps
+
+After completing the UI/UX specification:
+
+1.  Recommend review with stakeholders
+2.  Suggest creating/updating visual designs in design tool
+3.  Prepare for handoff to Design Architect for frontend architecture
+4.  Note any open questions or decisions needed
+
+#### Immediate Actions
+
+1.  Review this UI/UX Specification document thoroughly.
+2.  Begin creating high-fidelity visual mockups of the Task Detail Page in your chosen design tool (e.g., Figma), incorporating Shadcn UI components and Tailwind CSS principles.
+3.  Consider how the Task Detail Page will integrate as a modal/side panel with the Kanban view.
+
+#### Design Handoff Checklist
+
+- All user flows documented
+- Component inventory complete
+- Accessibility requirements defined
+- Responsive strategy clear
+- Brand guidelines incorporated
+- Performance goals established

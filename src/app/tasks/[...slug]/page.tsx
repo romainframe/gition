@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import {
+  AlertTriangle,
   Archive,
   ArrowLeft,
   BookOpen,
@@ -22,6 +23,7 @@ import {
 import path from "path";
 
 import { InspectOverlay } from "@/components/dev/inspect-overlay";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +33,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { InteractiveMarkdown } from "@/components/ui/interactive-markdown";
+import { EnhancedMarkdownRenderer } from "@/components/ui/enhanced-markdown-renderer";
 import { MetadataEditor } from "@/components/ui/metadata-editor";
 import { StatusEditor } from "@/components/ui/status-editor";
 import { TaskMetadataEditor } from "@/components/ui/task-metadata-editor";
@@ -270,6 +272,38 @@ const TaskList = ({
   );
 };
 
+// Helper function to remove first H1 line if it exists
+function removeFirstH1(content: string): string {
+  const lines = content.split("\n");
+
+  // Skip frontmatter if it exists
+  let startIndex = 0;
+  if (lines[0] && lines[0].trim() === "---") {
+    // Find the closing ---
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i] && lines[i].trim() === "---") {
+        startIndex = i + 1;
+        break;
+      }
+    }
+  }
+
+  // Look for the first H1 after frontmatter
+  for (let i = startIndex; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith("# ")) {
+      // Remove this line and return the content
+      return [...lines.slice(0, i), ...lines.slice(i + 1)].join("\n");
+    }
+    // If we encounter non-empty content that's not an H1, stop looking
+    if (line && !line.startsWith("#")) {
+      break;
+    }
+  }
+
+  return content;
+}
+
 export default function TaskDetailPage() {
   const resolvedParams = useParams();
   const slug = Array.isArray(resolvedParams?.slug)
@@ -278,6 +312,9 @@ export default function TaskDetailPage() {
 
   const [taskFile, setTaskFile] = useState<TaskFile | null>(null);
   const [references, setReferences] = useState<TaskReference[]>([]);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const {
     taskGroups,
     isLoading: loading,
@@ -305,12 +342,6 @@ export default function TaskDetailPage() {
   useEffect(() => {
     if (!slug || taskGroups.length === 0) return;
 
-    console.log("🎯 Task Detail - Looking for slug:", slug);
-    console.log(
-      "🎯 Available groups:",
-      taskGroups.map((g) => ({ id: g.id, name: g.name, file: g.file }))
-    );
-
     // Find the task group that matches this slug
     const group = taskGroups.find((group) => {
       const groupSlug = path.basename(group.file, path.extname(group.file));
@@ -322,22 +353,15 @@ export default function TaskDetailPage() {
         `${group.folder}/${group.file}` === slug,
       ].some(Boolean);
 
-      console.log("🎯 Checking group:", {
-        groupSlug,
-        groupId: group.id,
-        groupFile: group.file,
-        folder: group.folder,
-        matches,
-      });
-
       return matches;
     });
 
     if (group) {
-      console.log("🎯 Found matching group:", group);
-
       setTaskFile({
-        group,
+        group: {
+          ...group,
+          tasks: group.subtasks || [],
+        },
         tasks: group.subtasks || [],
         content: group.content || "",
         filename: group.file,
@@ -371,11 +395,30 @@ export default function TaskDetailPage() {
 
       setReferences(refs);
     } else {
-      console.log("🎯 No matching group found for slug:", slug);
       setTaskFile(null);
       setReferences([]);
     }
   }, [slug, taskGroups]);
+
+  // Measure content height to match sidebar height
+  useEffect(() => {
+    const measureContentHeight = () => {
+      if (contentRef.current) {
+        const height = contentRef.current.scrollHeight;
+        setContentHeight(height);
+      }
+    };
+
+    // Measure after content loads and when taskFile changes
+    if (taskFile?.content) {
+      // Use setTimeout to ensure content is rendered
+      setTimeout(measureContentHeight, 100);
+
+      // Also measure on window resize
+      window.addEventListener("resize", measureContentHeight);
+      return () => window.removeEventListener("resize", measureContentHeight);
+    }
+  }, [taskFile?.content]);
 
   if (loading) {
     return (
@@ -443,7 +486,7 @@ export default function TaskDetailPage() {
     <InspectOverlay componentId="task-detail-page">
       <div className="flex flex-col h-[calc(100vh-6rem)]">
         {/* Fixed Info Section */}
-        <div className="flex-shrink-0 space-y-6 pb-6 border-b border-border/40">
+        <div className="flex-shrink-0 space-y-6 pb-3 border-b border-border/40">
           {/* Header */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -459,7 +502,8 @@ export default function TaskDetailPage() {
               <div className="flex items-center gap-3">
                 {taskFile.group && getGroupIcon(taskFile.group.type)}
                 <h1 className="text-4xl font-bold tracking-tight">
-                  {taskFile.group?.name ||
+                  {taskFile.group?.metadata?.title ||
+                    taskFile.group?.name ||
                     path.basename(
                       taskFile.filename,
                       path.extname(taskFile.filename)
@@ -507,6 +551,33 @@ export default function TaskDetailPage() {
                   {taskFile.group.metadata.description}
                 </p>
               )}
+
+              {/* Metadata Alerts */}
+              {!taskFile.group?.metadata && (
+                <Alert
+                  variant="destructive"
+                  className="bg-orange-50 border-orange-200 dark:bg-orange-950 dark:border-orange-800"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    No metadata found. Add frontmatter to this file for better
+                    organization.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {taskFile.group?.metadata && !taskFile.group.metadata.title && (
+                <Alert
+                  variant="destructive"
+                  className="bg-yellow-50 border-yellow-200 dark:bg-yellow-950 dark:border-yellow-800"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    No title found in metadata. Add a &quot;title&quot; field to
+                    the frontmatter.
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -531,91 +602,96 @@ export default function TaskDetailPage() {
               )}
             </div>
           </div>
-
-          {/* Task Statistics */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Tasks
-                </CardTitle>
-                <ListTodo className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {taskFile.tasks.length}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                <Circle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {taskFile.tasks.filter((task) => !task.completed).length}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {taskFile.tasks.filter((task) => task.completed).length}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
-        {/* Scrollable Content Section */}
-        <div className="flex-1 overflow-auto no-scrollbar pt-6">
-          <div className="space-y-6">
-            {/* Task Content */}
-            {taskFile.content && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Content</CardTitle>
-                  <CardDescription>
-                    Markdown content with interactive tasks
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <InteractiveMarkdown
-                    content={taskFile.content}
-                    taskGroupId={taskFile.group?.id || slug}
-                    tasks={taskFile.tasks}
-                  />
-                </CardContent>
-              </Card>
-            )}
+        {/* Main Content with Right Sidebar */}
+        <div className="flex-1 flex gap-6 pt-3 overflow-hidden">
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-auto no-scrollbar">
+            <div ref={contentRef}>
+              {/* Task Content */}
+              {taskFile.content && (
+                <EnhancedMarkdownRenderer
+                  content={removeFirstH1(taskFile.content)}
+                  taskGroupId={taskFile.group?.id || slug}
+                  tasks={taskFile.tasks}
+                  className="max-w-none"
+                />
+              )}
 
-            {/* Task List */}
-            {taskFile.tasks.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Task List</CardTitle>
-                  <CardDescription>
-                    All tasks found in this file
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <TaskList
-                    tasks={taskFile.tasks}
-                    taskGroupId={taskFile.group?.id || slug}
-                  />
-                </CardContent>
-              </Card>
-            )}
+              {/* References */}
+              {references.length > 0 && (
+                <div className="mt-6">
+                  <TaskReferences references={references} />
+                </div>
+              )}
+            </div>
+          </div>
 
-            {/* References */}
-            <TaskReferences references={references} />
+          {/* Right Sidebar */}
+          <div
+            ref={sidebarRef}
+            className="w-80 flex-shrink-0"
+            style={{
+              height: contentHeight ? `${contentHeight}px` : "auto",
+              maxHeight: "100%",
+            }}
+          >
+            <div className="h-full flex flex-col space-y-4">
+              {/* Compact Task Statistics */}
+              <div className="flex-shrink-0 space-y-3">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  Task Overview
+                </h3>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <ListTodo className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Total</span>
+                    </div>
+                    <span className="text-lg font-bold">
+                      {taskFile.tasks.length}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <Circle className="h-4 w-4 text-orange-500" />
+                      <span className="text-sm font-medium">Pending</span>
+                    </div>
+                    <span className="text-lg font-bold">
+                      {taskFile.tasks.filter((task) => !task.completed).length}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium">Completed</span>
+                    </div>
+                    <span className="text-lg font-bold">
+                      {taskFile.tasks.filter((task) => task.completed).length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scrollable Task List */}
+              {taskFile.tasks.length > 0 && (
+                <div className="flex-1 flex flex-col min-h-0">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3 flex-shrink-0">
+                    Subtasks
+                  </h3>
+                  <div className="flex-1 overflow-auto no-scrollbar pr-2">
+                    <TaskList
+                      tasks={taskFile.tasks}
+                      taskGroupId={taskFile.group?.id || slug}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

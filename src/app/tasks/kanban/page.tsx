@@ -357,7 +357,6 @@ function KanbanPageContent() {
   // Refresh when taskGroups change
   useEffect(() => {
     if (taskGroups.length > 0) {
-      console.log("🎯 Kanban - taskGroups updated, refreshing board");
       fetchKanbanBoard();
     }
   }, [taskGroups, fetchKanbanBoard]);

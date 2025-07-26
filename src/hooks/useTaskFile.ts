@@ -13,6 +13,7 @@ interface TaskFile {
   relatedTasks: Array<Record<string, unknown>>;
   referencedBy: Array<Record<string, unknown>>;
   isDocsFile: boolean;
+  [key: string]: unknown;
 }
 
 export function useTaskFile(slug: string) {
@@ -97,7 +98,7 @@ export function useTaskFile(slug: string) {
 
     if (matchingGroup) {
       setTaskFile((prev) => {
-        if (!prev) return null;
+        if (!prev) return prev;
 
         // Update both metadata and subtasks
         const currentData = JSON.stringify({

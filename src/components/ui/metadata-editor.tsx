@@ -31,7 +31,7 @@ export interface MetadataEditorProps {
   taskGroupId: string;
   subtaskId: string;
   currentMetadata?: {
-    priority?: "low" | "medium" | "high";
+    priority?: "low" | "medium" | "high" | "critical";
     due_date?: string;
     assignee?: string;
     tags?: string[];

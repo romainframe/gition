@@ -60,4 +60,4 @@ src/app/docs/\[slug]/page.tsx
 # Playwright
 playwright-report/
 test-results/
-
+debug-screenshots

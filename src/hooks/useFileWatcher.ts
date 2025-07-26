@@ -2,22 +2,17 @@
 
 import { useCallback, useEffect, useRef } from "react";
 
+import type { FileChangeEvent } from "@/models";
 import { useDocsStore } from "@/store/useDocsStore";
 import { useStructureStore } from "@/store/useStructureStore";
 import { useTaskStore } from "@/store/useTaskStore";
-
-export interface FileChangeEvent {
-  type: "file-change" | "file-add" | "file-remove" | "connected" | "heartbeat";
-  path?: string;
-  timestamp: number;
-}
 
 export function useFileWatcher() {
   const eventSourceRef = useRef<EventSource | null>(null);
   const { debouncedRefresh } = useTaskStore();
   const { refreshDocs } = useDocsStore();
   const { refreshStructure } = useStructureStore();
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const maxReconnectAttempts = 5;
   const reconnectAttempts = useRef(0);
 

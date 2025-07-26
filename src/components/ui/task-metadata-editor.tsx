@@ -33,11 +33,11 @@ interface TaskMetadata {
   author?: string;
   tags?: string[];
   date?: string;
-  priority?: "low" | "medium" | "high";
+  priority?: "low" | "medium" | "high" | "critical";
   assignee?: string;
   due_date?: string;
   estimate?: string;
-  [key: string]: string | string[] | undefined;
+  [key: string]: unknown;
 }
 
 interface TaskMetadataEditorProps {

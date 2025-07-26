@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-import chokidar from "chokidar";
+import chokidar, { FSWatcher } from "chokidar";
 import fs from "fs";
 import { glob } from "glob";
 import path from "path";
@@ -11,7 +11,7 @@ import { getTargetDirectory } from "@/lib/mdx";
 const connections = new Set<ReadableStreamDefaultController>();
 
 // Global watcher instance
-let globalWatcher: chokidar.FSWatcher | null = null;
+let globalWatcher: FSWatcher | null = null;
 
 function initializeWatcher() {
   if (globalWatcher) {
@@ -61,7 +61,7 @@ function initializeWatcher() {
     ignored: /node_modules/,
     persistent: true,
     ignoreInitial: true,
-    recursive: true, // Watch subdirectories
+    // recursive: true is default for chokidar
   });
 
   globalWatcher.on("ready", () => {
@@ -71,7 +71,10 @@ function initializeWatcher() {
       "📁 Watching",
       Object.keys(watched).length,
       "directories with",
-      Object.values(watched).reduce((total, files) => total + files.length, 0),
+      Object.values(watched).reduce(
+        (total, files) => total + (files as string[]).length,
+        0
+      ),
       "files"
     );
   });

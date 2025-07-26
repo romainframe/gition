@@ -1,22 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-export interface MarkdownFile {
-  slug: string;
-  filename: string;
-  filepath: string;
-  content: string;
-  metadata: {
-    title?: string;
-    description?: string;
-    tags?: string[];
-    date?: string;
-    author?: string;
-    status?: "draft" | "published" | "archived";
-    [key: string]: unknown;
-  };
-  excerpt?: string;
-}
+import type { MarkdownFile } from "@/models";
 
 interface DocsStore {
   // State

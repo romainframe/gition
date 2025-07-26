@@ -1,19 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { TaskItem, getAllTasks, getTasksByGroup } from "@/lib/mdx";
-
-export interface KanbanColumn {
-  id: string;
-  title: string;
-  tasks: TaskItem[];
-}
-
-export interface KanbanBoard {
-  columns: KanbanColumn[];
-  totalTasks: number;
-  groupId?: string;
-  groupName?: string;
-}
+import { getAllTasks, getTasksByGroup } from "@/lib/mdx";
+import type { KanbanBoard, TaskItem } from "@/models";
 
 export async function GET(request: Request) {
   try {

@@ -72,7 +72,7 @@ export async function initializeProject(targetDir: string = process.cwd()) {
 }
 
 async function collectConfigurationAnswers(): Promise<InitAnswers> {
-  return await inquirer.prompt([
+  const baseAnswers = await inquirer.prompt([
     {
       type: "input",
       name: "name",
@@ -153,9 +153,18 @@ async function collectConfigurationAnswers(): Promise<InitAnswers> {
       default: true,
     },
   ]);
+
+  // Add taskTypes based on setupTaskTypes answer
+  const taskTypes = baseAnswers.setupTaskTypes
+    ? await setupCustomTaskTypes()
+    : [];
+
+  return {
+    ...baseAnswers,
+    taskTypes,
+  };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function setupCustomTaskTypes(): Promise<GitionTaskType[]> {
   const taskTypes: GitionTaskType[] = [];
   let addMore = true;
@@ -305,12 +314,19 @@ status: published
 
 # Welcome to ${config.name || "Gition"}
 
-${config.description || "This is your new documentation and task management workspace."}
+${
+  config.description ||
+  "This is your new documentation and task management workspace."
+}
 
 ## Getting Started
 
-1. **Documentation**: Add your markdown files to the \`${config.docsDir || "docs"}\` directory
-2. **Tasks**: Create task files in the \`${config.tasksDir || "tasks"}\` directory
+1. **Documentation**: Add your markdown files to the \`${
+    config.docsDir || "docs"
+  }\` directory
+2. **Tasks**: Create task files in the \`${
+    config.tasksDir || "tasks"
+  }\` directory
 3. **Hot-reload**: Edit files in your editor and see changes instantly in the browser
 
 ## Features Enabled

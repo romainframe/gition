@@ -1,24 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-export interface DirectoryNode {
-  name: string;
-  path: string;
-  type: "file" | "directory";
-  children?: DirectoryNode[];
-  isMarkdown?: boolean;
-}
-
-export interface DirectoryStructure {
-  root: DirectoryNode[];
-  docs: DirectoryNode[];
-  tasks: DirectoryNode[];
-  paths: {
-    target: string;
-    docs: string;
-    tasks: string;
-  };
-}
+import type { DirectoryStructure } from "@/models";
 
 interface StructureStore {
   // State

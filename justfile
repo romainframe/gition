@@ -35,9 +35,64 @@ check: lint
 # Run lint and typecheck (typecheck has known issues)
 check-strict: lint typecheck
 
-# Run tests
+# Run unit tests
 test:
   pnpm test
+
+# Run unit tests in watch mode
+test-watch:
+  pnpm test:watch
+
+# Run unit tests with coverage
+test-coverage:
+  pnpm test:coverage
+
+# Run E2E tests
+test-e2e:
+  pnpm test:e2e
+
+# Run E2E tests with UI
+test-e2e-ui:
+  pnpm test:e2e:ui
+
+# Run E2E tests in headed mode
+test-e2e-headed:
+  pnpm test:e2e:headed
+
+# Debug E2E tests
+test-e2e-debug:
+  pnpm test:e2e:debug
+
+# Run all tests (unit + E2E)
+test-all: test test-e2e
+
+# Run tests with coverage and open report
+test-coverage-open: test-coverage
+  open coverage/lcov-report/index.html
+
+# Run specific test file
+test-file file:
+  pnpm test {{file}}
+
+# Run tests matching pattern
+test-match pattern:
+  pnpm test -t "{{pattern}}"
+
+# Update test snapshots
+test-update-snapshots:
+  pnpm test -u
+
+# Run accessibility tests only
+test-a11y:
+  pnpm test:e2e tests/accessibility.spec.ts
+
+# Install Playwright browsers
+test-install-browsers:
+  pnpm exec playwright install --with-deps
+
+# Run tests in CI mode
+test-ci: test-coverage test-e2e
+  @echo "✅ All tests passed!"
 
 # Clean build artifacts
 clean:
@@ -186,7 +241,7 @@ verify: clean build test-cli
   @echo "✅ Build verified successfully!"
 
 # Full CI simulation
-ci: fresh check build
+ci: fresh check build test-ci
   @echo "✅ CI checks passed!"
 
 # Help with common tasks
@@ -198,6 +253,15 @@ help:
   @echo "  just test-cli     - Test the CLI locally"
   @echo "  just build        - Build for production"
   @echo "  just publish      - Publish to npm"
+  @echo ""
+  @echo "Testing commands:"
+  @echo "  just test         - Run unit tests"
+  @echo "  just test-watch   - Run unit tests in watch mode"
+  @echo "  just test-coverage - Run tests with coverage"
+  @echo "  just test-e2e     - Run E2E tests"
+  @echo "  just test-all     - Run all tests (unit + E2E)"
+  @echo "  just test-ci      - Run tests in CI mode"
+  @echo "  just test-a11y    - Run accessibility tests only"
   @echo ""
   @echo "Git workflow:"
   @echo "  just feature name - Create feature branch"

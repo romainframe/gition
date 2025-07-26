@@ -67,16 +67,14 @@ export function TaskStatusEditor({
 
     setIsLoading(true);
     try {
-      await updateTaskStatus(
-        taskId,
-        newStatus as
-          | "todo"
-          | "in_progress"
-          | "done"
-          | "draft"
-          | "published"
-          | "archived"
-      );
+      // Only call updateTaskStatus for document statuses
+      if (["draft", "published", "archived"].includes(newStatus)) {
+        await updateTaskStatus(
+          taskId,
+          newStatus as "draft" | "published" | "archived"
+        );
+      }
+      // TODO: Add handling for task statuses (todo, in_progress, done)
     } catch (error) {
       console.error("Failed to update task status:", error);
     } finally {

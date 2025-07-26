@@ -1,57 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-export interface TaskItem {
-  id: string;
-  title: string;
-  completed: boolean;
-  status: "todo" | "in_progress" | "done";
-  line: number;
-  file: string;
-  type: "doc" | "epic" | "story" | "custom";
-  folder?: string;
-  references?: string[];
-  metadata?: {
-    priority?: "low" | "medium" | "high";
-    due_date?: string;
-    assignee?: string;
-    tags?: string[];
-    estimate?: number;
-    status?: "blocked" | "waiting" | "review";
-  };
-}
-
-export interface TaskGroup {
-  id: string;
-  name: string;
-  type: "doc" | "epic" | "story" | "custom";
-  file: string;
-  folder?: string;
-  subtasks: TaskItem[];
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-  content?: string;
-  metadata?: {
-    title?: string;
-    description?: string;
-    tags?: string[];
-    date?: string;
-    author?: string;
-    status?:
-      | "draft"
-      | "published"
-      | "archived"
-      | "todo"
-      | "in_progress"
-      | "done";
-    priority?: "low" | "medium" | "high";
-    assignee?: string;
-    due_date?: string;
-    estimate?: string;
-    [key: string]: unknown;
-  };
-}
+import type { TaskGroup, TaskItem } from "@/models";
 
 interface TaskStore {
   // State
@@ -91,7 +41,10 @@ interface TaskStore {
   debouncedRefresh: () => void;
 
   // Task-level operations (for MDX files)
-  updateTaskStatus: (taskId: string, status: string) => Promise<void>;
+  updateTaskStatus: (
+    taskId: string,
+    status: "draft" | "published" | "archived"
+  ) => Promise<void>;
   updateTaskMetadata: (
     taskId: string,
     metadata: Record<string, unknown>

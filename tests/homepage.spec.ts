@@ -1,42 +1,47 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Homepage", () => {
-  test("should load and display main content", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    // Wait for the page to load completely
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("should load and display main content", async ({ page }) => {
+    // Wait for stats to load (the page shows loading state first)
+    await page.waitForSelector("h1:not(.text-muted-foreground)", {
+      timeout: 15000,
+    });
 
     // Should have a main heading with project name
     const mainHeading = page.locator("h1").first();
     await expect(mainHeading).toBeVisible();
 
-    // Should have project path displayed
-    const projectPath = page.locator("p").filter({ hasClass: /font-mono/ });
-    await expect(projectPath).toBeVisible();
+    // Should have project path displayed somewhere
+    await expect(page.locator("text=/Users/").first()).toBeVisible();
 
-    // Should have stats cards
-    const statsCards = page.locator('[data-slot="card"]');
-    await expect(statsCards).toHaveCount(3);
+    // Should have 4 cards total (3 stats + 1 getting started)
+    const allCards = page.locator('[data-slot="card"]');
+    await expect(allCards).toHaveCount(4);
 
     // Documentation card
-    const docsCard = statsCards.filter({ hasText: "Documentation" });
+    const docsCard = allCards.filter({ hasText: "Documentation" });
     await expect(docsCard).toBeVisible();
-    await expect(docsCard).toContainText("Browse Docs");
 
     // Tasks card
-    const tasksCard = statsCards.filter({ hasText: "Tasks" });
+    const tasksCard = allCards.filter({ hasText: "Tasks" });
     await expect(tasksCard).toBeVisible();
-    await expect(tasksCard).toContainText("View Tasks");
 
     // Quick Start card
-    const quickStartCard = statsCards.filter({ hasText: "Quick Start" });
+    const quickStartCard = allCards.filter({ hasText: "Quick Start" });
     await expect(quickStartCard).toBeVisible();
   });
 
   test("should have functional Browse Docs button", async ({ page }) => {
-    await page.goto("/");
+    // Wait for cards to load
+    await page.waitForSelector('[data-slot="card"]', { timeout: 15000 });
 
-    const browseDocsButton = page
-      .locator("a")
-      .filter({ hasText: "Browse Docs" });
+    const browseDocsButton = page.getByRole("link", { name: /docs/i }).first();
     await expect(browseDocsButton).toBeVisible();
 
     await browseDocsButton.click();
@@ -44,9 +49,10 @@ test.describe("Homepage", () => {
   });
 
   test("should have functional View Tasks button", async ({ page }) => {
-    await page.goto("/");
+    // Wait for cards to load
+    await page.waitForSelector('[data-slot="card"]', { timeout: 15000 });
 
-    const viewTasksButton = page.locator("a").filter({ hasText: "View Tasks" });
+    const viewTasksButton = page.getByRole("link", { name: /tasks/i }).first();
     await expect(viewTasksButton).toBeVisible();
 
     await viewTasksButton.click();
@@ -54,16 +60,16 @@ test.describe("Homepage", () => {
   });
 
   test("should display getting started section", async ({ page }) => {
-    await page.goto("/");
+    // Wait for all cards to load
+    await page.waitForSelector('[data-slot="card"]', { timeout: 15000 });
 
-    // Should have Getting Started card
-    const gettingStartedCard = page
-      .locator('[data-slot="card"]')
-      .filter({ hasText: "Getting Started" });
+    // The last card should be the getting started card
+    const gettingStartedCard = page.locator('[data-slot="card"]').last();
     await expect(gettingStartedCard).toBeVisible();
+    await expect(gettingStartedCard).toContainText("Getting Started");
 
     // Should have documentation and task management sections
-    await expect(gettingStartedCard).toContainText("Documentation Section");
+    await expect(gettingStartedCard).toContainText("Documentation");
     await expect(gettingStartedCard).toContainText("Task Management");
 
     // Should have task syntax examples

@@ -20,10 +20,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLanguage } from "@/contexts/language-context";
 import { useComponentInspect } from "@/hooks/use-inspect";
 import { cn } from "@/lib/utils";
-import {
-  type DirectoryNode,
-  useStructureStore,
-} from "@/store/useStructureStore";
+import type { DirectoryNode } from "@/models";
+import { useStructureStore } from "@/store/useStructureStore";
 import { GitionConfig } from "@/types/config";
 
 import { useConfig } from "./config-provider";

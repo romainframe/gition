@@ -2,76 +2,17 @@ import fs from "fs";
 import matter from "gray-matter";
 import path from "path";
 
+import type {
+  DirectoryNode,
+  FileMetadata,
+  MarkdownFile,
+  TaskGroup,
+  TaskItem,
+  TaskType,
+} from "@/models";
+import { getTaskTypeFromFolder } from "@/models";
+
 import { getConfig } from "./config";
-
-export interface FileMetadata {
-  title?: string;
-  description?: string;
-  tags?: string[];
-  date?: string;
-  author?: string;
-  status?: "draft" | "published" | "archived";
-  [key: string]: unknown;
-}
-
-export interface MarkdownFile {
-  slug: string;
-  filename: string;
-  filepath: string;
-  content: string;
-  metadata: FileMetadata;
-  excerpt?: string;
-}
-
-export interface TaskItem {
-  id: string;
-  title: string;
-  completed: boolean;
-  status: "todo" | "in_progress" | "done";
-  line: number;
-  file: string;
-  type: "doc" | "epic" | "story" | "custom";
-  folder?: string; // e.g., "epics", "stories"
-  references?: string[]; // e.g., ["epics/epic-01"]
-  metadata?: {
-    priority?: "low" | "medium" | "high";
-    due_date?: string;
-    assignee?: string;
-    tags?: string[];
-  };
-}
-
-export interface TaskGroup {
-  id: string;
-  name: string;
-  type: "doc" | "epic" | "story" | "custom";
-  file: string;
-  folder?: string;
-  subtasks: TaskItem[];
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-  content?: string;
-  metadata?: {
-    title?: string;
-    description?: string;
-    tags?: string[];
-    date?: string;
-    author?: string;
-    status?:
-      | "draft"
-      | "published"
-      | "archived"
-      | "todo"
-      | "in_progress"
-      | "done";
-    priority?: "low" | "medium" | "high";
-    assignee?: string;
-    due_date?: string;
-    estimate?: string;
-    [key: string]: unknown;
-  };
-}
 
 /**
  * Get the target directory from environment variable or default to current directory
@@ -135,8 +76,9 @@ export function getTasksDirectory(): string {
  * Check if a path is a markdown file
  */
 export function isMarkdownFile(filepath: string): boolean {
-  const ext = path.extname(filepath).toLowerCase();
-  return ext === ".md" || ext === ".mdx";
+  const filename = path.basename(filepath);
+  const ext = filename.toLowerCase().split(".").pop();
+  return ext === "md" || ext === "mdx";
 }
 
 /**
@@ -235,18 +177,12 @@ export function extractTasks(content: string, filepath: string): TaskItem[] {
   const relativePath = path.relative(getTargetDirectory(), filepath);
   const pathParts = relativePath.split(path.sep);
 
-  let taskType: "doc" | "epic" | "story" | "custom" = "doc";
+  let taskType: TaskType = "doc";
   let folder: string | undefined;
 
   if (pathParts[0] === "tasks" && pathParts.length > 2) {
     folder = pathParts[1];
-    if (folder === "epics") {
-      taskType = "epic";
-    } else if (folder === "stories") {
-      taskType = "story";
-    } else {
-      taskType = "custom";
-    }
+    taskType = getTaskTypeFromFolder(folder);
   }
 
   lines.forEach((line, index) => {
@@ -467,13 +403,7 @@ export function getTasksByGroup(groupId: string): TaskItem[] {
 /**
  * Get directory structure for file explorer
  */
-export interface DirectoryNode {
-  name: string;
-  path: string;
-  type: "file" | "directory";
-  children?: DirectoryNode[];
-  isMarkdown?: boolean;
-}
+// DirectoryNode is now imported from @/models
 
 export function getDirectoryStructure(directory: string): DirectoryNode[] {
   const nodes: DirectoryNode[] = [];

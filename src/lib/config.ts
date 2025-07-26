@@ -93,7 +93,7 @@ export class ConfigManager {
    * Get specific config value with dot notation
    */
   public get<T>(path: string): T | undefined {
-    return this.getNestedValue(this.config, path);
+    return this.getNestedValue(this.config, path) as T | undefined;
   }
 
   /**
@@ -151,7 +151,10 @@ export class ConfigManager {
         typeof source[key] === "object" &&
         !Array.isArray(source[key])
       ) {
-        result[key] = this.deepMerge(target[key] || {}, source[key]);
+        result[key] = this.deepMerge(
+          (target[key] as Record<string, unknown>) || {},
+          source[key] as Record<string, unknown>
+        );
       } else {
         result[key] = source[key];
       }

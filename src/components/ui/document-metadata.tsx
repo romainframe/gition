@@ -40,7 +40,7 @@ interface DocumentMetadata {
   language?: string;
   section?: string;
   order?: number;
-  priority?: "low" | "medium" | "high";
+  priority?: "low" | "medium" | "high" | "critical";
   difficulty?: "beginner" | "intermediate" | "advanced";
   readingTime?: number;
   wordCount?: number;
@@ -75,6 +75,8 @@ function formatDate(dateString: string): string {
 
 function getPriorityColor(priority?: string): string {
   switch (priority) {
+    case "critical":
+      return "destructive";
     case "high":
       return "destructive";
     case "medium":

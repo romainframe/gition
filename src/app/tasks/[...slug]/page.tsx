@@ -48,11 +48,11 @@ interface TaskItem {
   status: "todo" | "in_progress" | "done";
   line: number;
   file: string;
-  type: "doc" | "epic" | "story" | "custom";
+  type: "doc" | "epic" | "story" | "bug" | "custom";
   folder?: string;
   references?: string[];
   metadata?: {
-    priority?: "low" | "medium" | "high";
+    priority?: "low" | "medium" | "high" | "critical";
     due_date?: string;
     assignee?: string;
     tags?: string[];
@@ -64,7 +64,7 @@ interface TaskItem {
 interface TaskGroup {
   id: string;
   name: string;
-  type: "doc" | "epic" | "story" | "custom";
+  type: "doc" | "epic" | "story" | "bug" | "custom";
   file: string;
   folder?: string;
   tasks: TaskItem[];
@@ -78,7 +78,7 @@ interface TaskGroup {
     tags?: string[];
     author?: string;
     date?: string;
-    priority?: "low" | "medium" | "high";
+    priority?: "low" | "medium" | "high" | "critical";
     assignee?: string;
     due_date?: string;
     estimate?: string;
@@ -97,7 +97,7 @@ interface TaskReference {
   id: string;
   title: string;
   file: string;
-  type: "doc" | "epic" | "story" | "custom";
+  type: "doc" | "epic" | "story" | "bug" | "custom";
   folder?: string;
 }
 

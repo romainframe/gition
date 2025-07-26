@@ -1,0 +1,114 @@
+---
+title: Document Metadata Structure
+description: Specification for MDX document frontmatter and structure in Gition
+type: spec
+tags: [documentation, metadata, mdx]
+---
+
+# Document Metadata Structure
+
+This document defines the standard structure and possible values for MDX documents in Gition.
+
+## Frontmatter Fields
+
+All MDX documents can include frontmatter with the following optional fields:
+
+### Core Fields
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `title` | `string` | Document title (overrides H1 if present) | `"Getting Started Guide"` |
+| `description` | `string` | Brief description of the document | `"Learn how to set up Gition"` |
+| `type` | `string` | Document type | `"guide" \| "tutorial" \| "reference" \| "spec"` |
+| `tags` | `string[]` | Categorization tags | `["setup", "beginner"]` |
+
+### Author & Dates
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `author` | `string` | Document author | `"John Doe"` |
+| `created` | `string` | Creation date (ISO format) | `"2024-01-15"` |
+| `updated` | `string` | Last update date (ISO format) | `"2024-01-20"` |
+
+### Organization
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `category` | `string` | High-level category | `"documentation" \| "guides" \| "reference"` |
+| `section` | `string` | Section within category | `"getting-started"` |
+| `order` | `number` | Sort order within section | `1` |
+
+### Content Metadata
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `status` | `string` | Document status | `"draft" \| "review" \| "published" \| "archived"` |
+| `version` | `string` | Document version | `"1.0.0"` |
+| `language` | `string` | Content language | `"en" \| "fr" \| "es"` |
+
+## Subtask Integration
+
+Documents can contain **subtasks** (checkbox items) using standard markdown checkbox syntax:
+
+```markdown
+- [ ] Incomplete subtask
+- [x] Completed subtask
+- [ ] Subtask with metadata {priority: high, assignee: "john", due: "2024-02-01"}
+```
+
+**Important distinction:**
+- **Tasks** = MDX files themselves (appear in main task list and kanban)
+- **Subtasks** = Checkbox items within MDX files (appear inside task detail views)
+
+### Subtask References
+
+Subtasks can reference other documents or tasks:
+
+```markdown
+- [ ] Complete epic ref:epics/user-authentication
+- [ ] Review story ref:stories/login-form
+```
+
+## Example Document
+
+```mdx
+---
+title: "API Authentication Guide"
+description: "Learn how to implement authentication in your API"
+type: "guide"
+category: "documentation"
+section: "api"
+tags: ["authentication", "security", "api"]
+author: "Development Team"
+created: "2024-01-15"
+status: "published"
+version: "1.2.0"
+---
+
+# API Authentication Guide
+
+This guide covers authentication implementation.
+
+## Requirements
+
+- [ ] Set up OAuth provider {priority: high, assignee: "backend-team"}
+- [ ] Implement JWT tokens ref:specs/jwt-implementation
+- [x] Create user registration endpoint
+
+## Related Documents
+
+- [JWT Implementation](../specs/jwt-implementation.mdx)
+- [Security Best Practices](../guides/security.mdx)
+```
+
+## Validation
+
+Gition automatically parses frontmatter and validates known fields. Unknown fields are preserved and accessible through the frontmatter object.
+
+## Best Practices
+
+1. **Use consistent `type` values** across your documentation
+2. **Include `description`** for better search and navigation
+3. **Tag documents** appropriately for categorization
+4. **Reference related documents** using relative paths
+5. **Use subtask references** to create relationships between documents

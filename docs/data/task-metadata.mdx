@@ -1,0 +1,248 @@
+---
+title: Task and Subtask Structure
+description: Specification for task files and subtask syntax in Gition
+type: spec
+tags: [tasks, subtasks, metadata, kanban]
+---
+
+# Task and Subtask Structure
+
+This document defines the structure for **Tasks** (MDX files) and **Subtasks** (checkbox items within files) in Gition.
+
+## Important Distinction
+
+- **Tasks** = MDX files themselves (e.g., `tasks/epics/user-auth.mdx`)
+  - Appear in main task list and kanban board
+  - Have file-level frontmatter metadata
+  - Can be clicked to view full content
+
+- **Subtasks** = Checkbox items within MDX files (e.g., `- [ ] Set up database`)
+  - Appear inside task detail views
+  - Have inline metadata
+  - Extracted from markdown content
+
+## Task Files (Primary Level)
+
+Tasks are MDX files organized in folders:
+
+```
+tasks/
+├── epics/
+│   ├── user-authentication.mdx  ← Task file
+│   └── payment-system.mdx       ← Task file
+├── stories/
+│   ├── login-form.mdx           ← Task file
+│   └── checkout-flow.mdx        ← Task file
+└── docs/
+    └── api-guide.mdx            ← Task file
+```
+
+### Task File Metadata
+
+Tasks use frontmatter for metadata (see [Document Metadata](./doc-metadata.mdx) for details):
+
+```mdx
+---
+title: "User Authentication Epic"
+description: "Complete user authentication system"
+type: "epic"
+priority: "high"
+assignee: "backend-team"
+due: "2024-02-15"
+tags: ["authentication", "security"]
+---
+
+# User Authentication Epic
+
+Your task content here...
+```
+
+## Subtask Syntax (Within Task Files)
+
+Subtasks use standard markdown checkbox syntax within task files:
+
+```markdown
+- [ ] Incomplete subtask
+- [x] Completed subtask
+- [~] In progress subtask (alternative syntax)
+```
+
+## Subtask States
+
+| Syntax | State | Description |
+|--------|-------|-------------|
+| `- [ ]` | `todo` | Subtask not started |
+| `- [x]` | `done` | Subtask completed |
+| `- [~]` | `in_progress` | Subtask in progress (optional) |
+
+## Subtask Inline Metadata
+
+Subtasks can include inline metadata using JSON-like syntax at the end of the line:
+
+```markdown
+- [ ] Subtask title {key: value, key2: "string value"}
+```
+
+### Supported Subtask Metadata Fields
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `priority` | `"low" \| "medium" \| "high"` | Subtask priority | `{priority: "high"}` |
+| `assignee` | `string` | Person assigned to subtask | `{assignee: "john"}` |
+| `due` | `string` | Due date (YYYY-MM-DD) | `{due: "2024-02-01"}` |
+| `tags` | `string[]` | Subtask tags | `{tags: ["frontend", "ui"]}` |
+| `estimate` | `number` | Time estimate in hours | `{estimate: 4}` |
+| `status` | `"blocked" \| "waiting" \| "review"` | Additional status | `{status: "blocked"}` |
+
+## Subtask References
+
+Subtasks can reference other task files or documents using the `ref:` syntax:
+
+```markdown
+- [ ] Complete user authentication ref:epics/user-auth
+- [ ] Review login form ref:stories/login-ui
+- [ ] Update documentation ref:docs/auth-guide
+```
+
+### Reference Patterns
+
+| Pattern | Description | Example |
+|---------|-------------|---------|
+| `ref:epics/task-name` | Reference to epic | `ref:epics/user-management` |
+| `ref:stories/task-name` | Reference to story | `ref:stories/login-form` |
+| `ref:docs/doc-name` | Reference to document | `ref:docs/api-guide` |
+| `ref:folder/file-name` | Reference to any file | `ref:specs/database-schema` |
+
+## Organization Hierarchy
+
+### Task Files (Main Level)
+
+Task files create the main items in the task list and kanban board.
+
+### Subtasks Within Files
+
+Subtasks can be nested within task files to create hierarchical structure:
+
+```markdown
+## Epic: User Authentication
+
+- [ ] Set up authentication system {priority: "high"}
+  - [ ] Research OAuth providers {assignee: "alice"}
+  - [ ] Choose authentication library {assignee: "bob"}
+  - [ ] Implement JWT tokens {due: "2024-02-15"}
+
+- [x] Create user registration
+  - [x] Design registration form
+  - [x] Implement validation
+  - [ ] Add email verification {priority: "medium"}
+```
+
+## Task File Types by Location
+
+### Epic Task Files (`tasks/epics/`)
+
+High-level feature task files containing subtasks:
+
+```markdown
+## Epic: User Management System
+
+- [ ] Implement user registration {priority: "high", estimate: 40}
+- [ ] Add real-time notifications ref:stories/notification-ui
+- [x] Set up CI/CD pipeline {assignee: "devops-team"}
+```
+
+### Story Task Files (`tasks/stories/`)
+
+Specific feature task files with implementation subtasks:
+
+```markdown
+## Story: User Login
+
+- [ ] User can log in with email {priority: "high", assignee: "frontend"}
+- [ ] Admin can manage user roles {due: "2024-02-01"}
+- [x] User profile page displays correctly
+```
+
+### Documentation Task Files (`docs/`)
+
+Documentation task files with writing/review subtasks:
+
+```markdown
+## API Documentation
+
+- [ ] Update API documentation {assignee: "tech-writer"}
+- [ ] Add code examples to guide {priority: "medium"}
+- [x] Review installation instructions
+```
+
+## Complete Task File Example
+
+This shows a complete task file with frontmatter and subtasks:
+
+```mdx
+---
+title: "User Authentication Epic"
+description: "Complete user authentication system implementation"
+type: "epic"
+priority: "high"
+assignee: "backend-team"
+due: "2024-02-15"
+tags: ["authentication", "security", "backend"]
+---
+
+# User Authentication Epic
+
+Implement a complete user authentication system.
+
+## Core Requirements (Subtasks)
+
+- [ ] OAuth 2.0 integration {priority: "high", assignee: "backend-team", due: "2024-02-15"}
+- [ ] JWT token management {priority: "high", due: "2024-02-10"}
+- [ ] Password reset functionality {priority: "medium", assignee: "fullstack"}
+
+## Related Stories (Subtask References)
+
+- [ ] Login form UI ref:stories/login-form
+- [ ] Registration flow ref:stories/user-registration
+- [ ] Password reset UI ref:stories/password-reset
+
+## Technical Subtasks
+
+- [x] Set up authentication database schema
+- [ ] Implement middleware for protected routes {assignee: "backend"}
+- [ ] Add rate limiting for auth endpoints {priority: "medium"}
+- [ ] Write authentication tests {tags: ["testing"], estimate: 8}
+
+## Documentation Subtasks
+
+- [ ] Update API documentation ref:docs/api-authentication
+- [ ] Create user guide for login process
+```
+
+**Key points:**
+- The **task** is the file itself (`user-authentication.mdx`)
+- **Subtasks** are the checkbox items within the file
+- Task metadata goes in frontmatter
+- Subtask metadata goes inline with each checkbox
+
+## Best Practices
+
+### For Task Files
+1. **Use descriptive file names** and titles that clearly explain the feature/goal
+2. **Add comprehensive frontmatter** with type, priority, assignee, and due dates
+3. **Organize in logical folders** (epics/, stories/, docs/)
+4. **Include clear descriptions** in frontmatter and content
+
+### For Subtasks
+1. **Write specific, actionable subtasks** that can be completed independently
+2. **Add inline metadata** for important subtasks (priority, assignee, due dates)
+3. **Use subtask references** to create connections between files
+4. **Organize subtasks hierarchically** when they have sub-components
+5. **Update subtask status** regularly to reflect current progress
+6. **Include estimates** for planning purposes
+7. **Tag subtasks** for easy filtering and organization
+
+### General
+1. **Maintain clear distinction** between task files and their contained subtasks
+2. **Use consistent naming** and folder structures across your project
+3. **Keep task files focused** on a single epic, story, or documentation area

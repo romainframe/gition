@@ -128,29 +128,30 @@ test-cli-dir dir:
 test-init:
   node bin/gition.js init test-project
 
-# Publish to npm (dry run)
+# Publish to pnpm (dry run)
 publish-dry:
-  npm publish --dry-run
+  pnpm publish --dry-run
 
-# Publish to npm
+# Publish to pnpm
 publish:
-  npm publish
+  pnpm publish
 
 # Bump version (patch)
 bump-patch:
-  npm version patch
+  pnpm version patch
 
 # Bump version (minor)
 bump-minor:
-  npm version minor
+  pnpm version minor
 
 # Bump version (major)
 bump-major:
-  npm version major
+  pnpm version major
 
 # Create a new release (bump patch + publish)
 release-patch:
-  just publish-dry
+  just validate
+  pnpm build
   just bump-patch
   git push
   just release patch
@@ -158,7 +159,8 @@ release-patch:
 
 # Create a new release (bump minor + publish)
 release-minor:
-  just publish-dry
+  just validate
+  pnpm build
   just bump-minor
   git push
   just release minor
@@ -250,7 +252,7 @@ watch:
 analyze:
   ANALYZE=true pnpm build
 
-# Run a specific npm script
+# Run a specific pnpm script
 run script:
   pnpm {{script}}
 

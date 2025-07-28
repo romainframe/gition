@@ -5,7 +5,6 @@ const { Command } = require("commander");
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-const open = require("open");
 
 const program = new Command();
 
@@ -55,6 +54,7 @@ program
         NODE_ENV: "production",
       },
       stdio: ["inherit", "pipe", "pipe"], // Capture stdout/stderr to filter output
+      detached: false, // Ensure child process dies with parent
     });
 
     // Filter and show only essential output
@@ -79,25 +79,38 @@ program
     });
 
     // Handle process termination
-    process.on("SIGINT", () => {
+    const shutdown = () => {
       console.log("\n👋 Shutting down Gition...");
-      nextProcess.kill("SIGINT");
-      process.exit(0);
-    });
+      if (nextProcess && !nextProcess.killed) {
+        nextProcess.kill("SIGTERM");
+        // Give the process time to clean up
+        setTimeout(() => {
+          if (!nextProcess.killed) {
+            nextProcess.kill("SIGKILL");
+          }
+          process.exit(0);
+        }, 1000);
+      } else {
+        process.exit(0);
+      }
+    };
+
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
 
     // Open browser after a short delay
-    if (options.open && open) {
-      setTimeout(() => {
-        open(`http://localhost:${options.port}`).catch(() => {
+    if (options.open) {
+      setTimeout(async () => {
+        try {
+          // Dynamically import the ES module
+          const { default: open } = await import("open");
+          await open(`http://localhost:${options.port}`);
+        } catch (_error) {
           console.log(
             `📋 Please open your browser to: http://localhost:${options.port}`
           );
-        });
+        }
       }, 3000);
-    } else if (options.open) {
-      console.log(
-        `📋 Please open your browser to: http://localhost:${options.port}`
-      );
     }
 
     nextProcess.on("error", (error) => {

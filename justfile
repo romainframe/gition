@@ -116,7 +116,7 @@ start:
 # Build and start production server
 prod: build start
 
-# Test the CLI locally
+# Test the CLI locally (runs for 10 seconds then auto-shuts down)
 test-cli:
   node bin/gition.js
 

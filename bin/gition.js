@@ -5,13 +5,7 @@ const { Command } = require("commander");
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-let open;
-try {
-  open = require("open");
-} catch {
-  // open package not available, we'll skip auto-opening
-  open = null;
-}
+const open = require("open");
 
 const program = new Command();
 
@@ -39,8 +33,9 @@ program
     }
 
     console.log(`🚀 Starting Gition UI (production mode)`);
-    console.log(`📂 Directory: ${targetDir}`);
-    console.log(`🌐 Server: http://localhost:${options.port}`);
+    console.log(
+      `Loading Gition UI server on http://localhost:${options.port}, serving ${targetDir} ...`
+    );
 
     // Find the Next.js project root (where this CLI is installed)
     const gitionRoot = path.resolve(__dirname, "..");

@@ -21,6 +21,12 @@ const eslintConfig = [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/no-require-imports": [
+        "error",
+        {
+          allow: ["__tests__"],
+        },
+      ],
     },
   },
 ];

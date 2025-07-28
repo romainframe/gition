@@ -1,52 +1,104 @@
+name: Test
+description: Documentation and task management workspace
+version: 1.0.0
+docsDir: docs
+tasksDir: tasks
+outputDir: .gition/build
+theme:
+  primaryColor: hsl(var(--primary))
+  backgroundColor: hsl(var(--background))
+  textColor: hsl(var(--foreground))
+  accentColor: hsl(var(--accent))
+  borderRadius: 0.5rem
+  fontFamily: var(--font-geist-sans)
+  fontSize:
+    small: 0.875rem
+    medium: 1rem
+    large: 1.125rem
+taskTypes:
+  - name: Epic
+    folder: epics
+    icon: Target
+    color: purple
+    description: Large features or initiatives
+    defaultPriority: high
+  - name: Story
+    folder: stories
+    icon: Archive
+    color: blue
+    description: User stories and features
+    defaultPriority: medium
+  - name: Task
+    folder: tasks
+    icon: FileText
+    color: green
+    description: Individual tasks and todos
+    defaultPriority: medium
+  - name: Bug
+    folder: bugs
+    icon: AlertCircle
+    color: red
+    description: Bug reports and fixes
+    defaultPriority: high
+defaultTaskType: Task
+users: []
+defaultAssignee: ""
+env: {}
+port: 3000
+host: localhost
+features:
+  hotReload: true
+  darkMode: true
+  search: true
+  analytics: false
+  collaboration: false
+defaultLanguage: en
+supportedLanguages:
+  - en
+  - fr
+  - es
+markdown:
+  enableMermaid: true
+  enableCodeHighlighting: true
+  enableTables: true
+  enableMath: false
+paths:
+  assets: assets
+  uploads: uploads
+  templates: templates
 kind: GlobalConfig
-version: "1.0.0"
-
 spec:
-  name: "Gition Development"
-  description: "Zero-config local web interface for managing Markdown/MDX documentation and tasks"
-
+  name: Gition Development
+  description: Zero-config local web interface for managing Markdown/MDX documentation and tasks
   theme:
     primaryColor: "#1dd8f9"
     darkMode: true
-
-  # Feature Configuration
   features:
     taskManagement: true
     realTimeUpdates: true
     search: true
     darkModeToggle: true
     languageSelector: true
-
-  # Task Types
   taskTypes:
-    - name: "epic"
-      folder: "epics"
-      icon: "target"
+    - name: epic
+      folder: epics
+      icon: target
       color: "#8b5cf6"
-    - name: "story"
-      folder: "stories"
-      icon: "book"
+    - name: story
+      folder: stories
+      icon: book
       color: "#3b82f6"
-    - name: "bug"
-      folder: "bugs"
-      icon: "bug"
+    - name: bug
+      folder: bugs
+      icon: bug
       color: "#ef4444"
-    - name: "task"
-      folder: "tasks"
-      icon: "check-circle"
+    - name: task
+      folder: tasks
+      icon: check-circle
       color: "#10b981"
-
-  # Development-specific settings
   development:
     debug: true
-    logLevel: "info"
+    logLevel: info
     hotReload: true
-# # Users
-# users:
-#   - name: "Romainframe"
-#     email: "romain@untereiner.com"
-#     role: "Maintainer"
-
-# # Language
-# defaultLanguage: "en"
-
+server:
+  port: 4000

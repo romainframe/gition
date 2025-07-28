@@ -84,7 +84,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="animate-pulse space-y-8">
+      <div className="animate-pulse space-y-8" data-testid="loading-skeleton">
         <div className="h-10 bg-muted/50 rounded-lg w-1/3" />
         <div className="grid gap-6 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (

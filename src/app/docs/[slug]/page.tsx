@@ -134,8 +134,8 @@ export default function DocPage() {
         processedContent: "",
       };
 
-    const title = doc.metadata.title || doc.slug;
-    const description = doc.metadata.description || doc.excerpt;
+    const title = doc.metadata?.title || doc.slug;
+    const description = doc.metadata?.description || doc.excerpt;
 
     // Strip first H1 to avoid duplication with header title
     const processedContent = removeFirstH1(doc.content);

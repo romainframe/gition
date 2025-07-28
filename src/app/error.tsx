@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { AlertCircle } from "lucide-react";
 
-export default function Error({
+export default function ErrorComponent({
   error,
   reset,
 }: {

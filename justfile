@@ -29,15 +29,12 @@ lint-fix:
 typecheck:
   npx tsc --noEmit
 
-# Run all checks (lint only for now, typecheck has known issues)
-check: lint
-
 # Run prettier
 check-pretty:
   pnpm prettier --check .
 
 # Run lint, typecheck, and prettier
-check-all: lint typecheck check-pretty
+validate: lint typecheck check-pretty
 
 # Run prettier
 prettify:
@@ -249,15 +246,16 @@ verify: clean build test-cli
   @echo "✅ Build verified successfully!"
 
 # Full CI simulation
-ci: fresh check build test-ci
+ci: fresh validate build test-ci
   @echo "✅ CI checks passed!"
 
 # Help with common tasks
 help:
   @echo "Common development tasks:"
   @echo "  just dev          - Start development server"
-  @echo "  just check        - Run lint checks"
-  @echo "  just check-strict - Run lint and typecheck (has known issues)"
+  @echo "  just lint         - Run lint checks"
+  @echo "  just validate     - Run lint, typecheck, and prettier"
+  @echo "  just prettify     - Run prettier"
   @echo "  just test-cli     - Test the CLI locally"
   @echo "  just build        - Build for production"
   @echo "  just publish      - Publish to npm"

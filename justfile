@@ -150,13 +150,17 @@ bump-major:
 
 # Create a new release (bump patch + publish)
 release-patch:
+  just publish-dry
   just bump-patch
+  git push
   just release patch
   just publish
 
 # Create a new release (bump minor + publish)
 release-minor:
+  just publish-dry
   just bump-minor
+  git push
   just release minor
   just publish
 

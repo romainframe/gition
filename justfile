@@ -149,10 +149,34 @@ bump-major:
   npm version major
 
 # Create a new release (bump patch + publish)
-release-patch: bump-patch publish
+release-patch:
+  just bump-patch
+  just release patch
+  just publish
 
 # Create a new release (bump minor + publish)
-release-minor: bump-minor publish
+release-minor:
+  just bump-minor
+  just release minor
+  just publish
+
+# Create a GitHub release with automatic version detection
+release type="patch":
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  # Capture the new version
+  NEW_VERSION=$(jq -r .version package.json)
+  
+  # Create GitHub release
+  echo "🚀 Creating GitHub release v${NEW_VERSION}..."
+  gh release create "v${NEW_VERSION}" \
+    --title "v${NEW_VERSION}" \
+    --target main \
+    --generate-notes \
+    --latest
+  
+  echo "✅ Released v${NEW_VERSION} successfully!"
 
 # Git status
 status:
@@ -275,5 +299,8 @@ help:
   @echo "  just push         - Push to remote"
   @echo ""
   @echo "Release workflow:"
-  @echo "  just release-patch - Bump patch version and publish"
-  @echo "  just release-minor - Bump minor version and publish"
+  @echo "  just release       - Create GitHub release (default: patch)"
+  @echo "  just release minor - Create GitHub release with minor bump"
+  @echo "  just release major - Create GitHub release with major bump"
+  @echo "  just release-patch - Bump patch version and publish to npm"
+  @echo "  just release-minor - Bump minor version and publish to npm"

@@ -22,6 +22,7 @@ program
   )
   .option("-p, --port <port>", "Port to run on", "3000")
   .option("--no-open", "Do not automatically open browser")
+  .option("--verbose", "Show detailed startup information")
   .action(async (directory, options) => {
     const targetDir = path.resolve(directory);
 
@@ -60,21 +61,35 @@ program
     // Filter and show only essential output
     nextProcess.stdout.on("data", (data) => {
       const output = data.toString();
-      // Only show Ready message and errors, suppress verbose Next.js output
-      if (
-        output.includes("Ready in") ||
-        output.includes("Error") ||
-        output.includes("Failed")
-      ) {
-        process.stdout.write(`✅ ${output.replace(/.*Ready in/, "Ready in")}`);
+
+      if (options.verbose) {
+        // In verbose mode, show everything
+        process.stdout.write(output);
+      } else {
+        // Only show Ready message and errors, suppress verbose Next.js output
+        if (
+          output.includes("Ready in") ||
+          output.includes("Error") ||
+          output.includes("Failed")
+        ) {
+          process.stdout.write(
+            `✅ ${output.replace(/.*Ready in/, "Ready in")}`
+          );
+        }
       }
     });
 
     nextProcess.stderr.on("data", (data) => {
       const output = data.toString();
-      // Suppress lockfile warnings and other verbose warnings
-      if (!output.includes("lockfile") && !output.includes("Warning:")) {
+
+      if (options.verbose) {
+        // In verbose mode, show everything
         process.stderr.write(output);
+      } else {
+        // Suppress lockfile warnings and other verbose warnings
+        if (!output.includes("lockfile") && !output.includes("Warning:")) {
+          process.stderr.write(output);
+        }
       }
     });
 

@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   generateEtags: true,
 
+  // Standalone output for better performance
+  output: "standalone",
+
   // ESLint configuration for build
   eslint: {
     // Warning: This allows production builds to successfully complete even if

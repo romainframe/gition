@@ -1,6 +1,6 @@
 {
   "name": "gition-ui",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Zero-config, local web interface for managing Markdown/MDX documentation and tasks. Think Notion + Jira, but for your local files with real-time hot-reload and beautiful UI.",
   "keywords": [
     "documentation",
